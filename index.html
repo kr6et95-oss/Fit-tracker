@@ -1,0 +1,2314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="체중 관리는 꾸준함이 답입니다">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FIT TRACKER">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23667eea' width='100' height='100'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='white'%3E💪%3C/text%3E%3C/svg%3E">
+    <title>FIT TRACKER - 체중 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #1a1a2e;
+            --accent: #ff6b6b;
+            --success: #4ecdc4;
+            --warning: #ffe66d;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+        }
+        
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        
+        .card h2 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Nanum Gothic', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        textarea { resize: vertical; min-height: 80px; }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,107,107,0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            width: auto;
+        }
+        
+        .water-btn {
+            padding: 10px 15px;
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 2px solid #90caf9;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .water-btn:hover {
+            background: #90caf9;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .header-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.95);
+            color: var(--primary);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .header-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .meal-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .meal-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .meal-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .meal-count {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .progress-section {
+            margin: 20px 0;
+        }
+
+        .progress-item {
+            margin-bottom: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .progress-label {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .progress-values {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .progress-bar.protein {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .progress-bar.carb {
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .progress-bar.fat {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .progress-bar.over {
+            background: linear-gradient(90deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+
+        .remaining-text {
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .remaining-text.complete {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .remaining-text.over {
+            color: #ff6b6b;
+            font-weight: 700;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .goal-box {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .goal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .goal-item {
+            text-align: center;
+        }
+        
+        .goal-label {
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .goal-value {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 40px auto;
+            padding: 0;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+        }
+        
+        .close {
+            font-size: 2rem;
+            cursor: pointer;
+            color: white;
+            background: none;
+            border: none;
+        }
+        
+        .modal-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .method-btn {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            padding: 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .method-btn:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        .method-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .food-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .food-item {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .food-item:hover {
+            border-color: var(--accent);
+            background: #fff5f5;
+        }
+        
+        .food-item.selected {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+        
+        .food-item-photo {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .food-item-content {
+            flex: 1;
+        }
+        
+        .food-name {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .food-info {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .added-list {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .added-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .photo-upload {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border: 2px dashed #e0e0e0;
+            border-radius: 15px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .photo-item {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        
+        .history-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .history-date {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .hidden { display: none !important; }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .meal-grid, .stats-grid, .goal-grid, .method-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💪 FIT TRACKER</h1>
+            <p class="subtitle">체중 관리는 꾸준함이 답입니다</p>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+                <button onclick="toggleDarkMode()" class="header-btn" id="darkModeBtn">🌙 다크모드</button>
+                <button onclick="openWaterModal()" class="header-btn">💧 물</button>
+                <button onclick="openFavoritesModal()" class="header-btn">⭐ 즐겨찾기</button>
+                <button onclick="openRecentModal()" class="header-btn">🕐 최근</button>
+                <button onclick="openTemplateModal()" class="header-btn">📋 템플릿</button>
+                <button onclick="openNutritionChartModal()" class="header-btn">📊 차트</button>
+                <button onclick="openNotificationModal()" class="header-btn">🔔 알림</button>
+                <button onclick="openBackupModal()" class="header-btn">💾 백업</button>
+            </div>
+        </header>
+
+        <!-- 설정 -->
+        <div id="settingsCard" class="card hidden">
+            <h2>⚙️ 기본 설정</h2>
+            <div class="input-group">
+                <label>성별</label>
+                <select id="gender">
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>나이</label>
+                <input type="number" id="age" placeholder="25">
+            </div>
+            <div class="input-group">
+                <label>키 (cm)</label>
+                <input type="number" id="height" placeholder="175">
+            </div>
+            <div class="input-group">
+                <label>현재 체중 (kg)</label>
+                <input type="number" id="currentWeight" step="0.1" placeholder="70">
+            </div>
+            <div class="input-group">
+                <label>체지방률 (%)</label>
+                <input type="number" id="bodyFat" step="0.1" placeholder="20">
+            </div>
+            <div class="input-group">
+                <label>목표 체중 (kg)</label>
+                <input type="number" id="targetWeight" step="0.1" placeholder="65">
+            </div>
+            <div class="input-group">
+                <label>활동 수준</label>
+                <select id="activityLevel">
+                    <option value="1.2">거의 안 움직임 - 사무직, 하루 종일 앉아서 일함</option>
+                    <option value="1.375">가벼운 활동 - 가끔 걷기, 주 1-2회 가벼운 운동</option>
+                    <option value="1.55" selected>보통 활동 - 주 3-4회 운동, 직장에서 자주 이동</option>
+                    <option value="1.725">활발한 활동 - 주 5-6회 운동, 육체 노동</option>
+                    <option value="1.9">매우 활발 - 매일 고강도 운동, 운동선수 수준</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="saveSettings()">설정 저장</button>
+        </div>
+
+        <!-- 목표 -->
+        <div id="goalCard" class="card hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📊 나의 목표</h2>
+                <button class="btn btn-small btn-secondary" onclick="showSettings()">수정</button>
+            </div>
+            <div class="goal-box">
+                <div class="goal-grid">
+                    <div class="goal-item">
+                        <div class="goal-label">현재</div>
+                        <div class="goal-value" id="dispCurrent">-</div>
+                    </div>
+                    <div class="goal-item">
+                        <div class="goal-label">목표</div>
+                        <div class="goal-value" id="dispTarget">-</div>
+                    </div>
+                    <div class="goal-item">
+                        <div class="goal-label">감량</div>
+                        <div class="goal-value" id="dispDiff">-</div>
+                    </div>
+                </div>
+                <div style="text-align: center; padding-top: 15px; border-top: 2px solid rgba(0,0,0,0.1);">
+                    <div class="goal-label">예상 기간</div>
+                    <div class="goal-value" id="dispDays" style="font-size: 1.8rem;">-</div>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-box" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <div class="stat-label">칼로리</div>
+                    <div class="stat-value" id="dispCal">-</div>
+                </div>
+                <div class="stat-box" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                    <div class="stat-label">단백질</div>
+                    <div class="stat-value" id="dispPro">-</div>
+                </div>
+                <div class="stat-box" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                    <div class="stat-label">탄수화물</div>
+                    <div class="stat-value" id="dispCarb">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 일일 기록 -->
+        <div id="recordCard" class="card hidden">
+            <h2>📅 오늘 기록</h2>
+            <div class="input-group">
+                <label>체중 (kg)</label>
+                <input type="number" id="todayWeight" step="0.1" placeholder="70.5">
+            </div>
+
+            <div class="input-group">
+                <label>체지방률 (%)</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="number" id="todayBodyFat" step="0.1" placeholder="20" style="flex: 1;">
+                    <label style="display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap;">
+                        <input type="checkbox" id="bodyFatUnknown" onchange="toggleBodyFat()" style="width: auto;">
+                        <span>모름</span>
+                    </label>
+                </div>
+            </div>
+            
+            <label>식사 기록</label>
+            <div class="meal-grid">
+                <div class="meal-card" onclick="openMeal('breakfast')">
+                    <div class="meal-icon">🍳</div>
+                    <div class="meal-name">아침</div>
+                    <div class="meal-count" id="breakfastCount">(0)</div>
+                </div>
+                <div class="meal-card" onclick="openMeal('lunch')">
+                    <div class="meal-icon">🍱</div>
+                    <div class="meal-name">점심</div>
+                    <div class="meal-count" id="lunchCount">(0)</div>
+                </div>
+                <div class="meal-card" onclick="openMeal('dinner')">
+                    <div class="meal-icon">🍽️</div>
+                    <div class="meal-name">저녁</div>
+                    <div class="meal-count" id="dinnerCount">(0)</div>
+                </div>
+                <div class="meal-card" onclick="openMeal('snack')">
+                    <div class="meal-icon">🍪</div>
+                    <div class="meal-name">간식</div>
+                    <div class="meal-count" id="snackCount">(0)</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="quickPhotoUpload('breakfast')" style="padding: 12px; font-size: 0.95rem;">📸 아침 사진</button>
+                <button class="btn btn-secondary" onclick="quickPhotoUpload('lunch')" style="padding: 12px; font-size: 0.95rem;">📸 점심 사진</button>
+                <button class="btn btn-secondary" onclick="quickPhotoUpload('dinner')" style="padding: 12px; font-size: 0.95rem;">📸 저녁 사진</button>
+                <button class="btn btn-secondary" onclick="quickPhotoUpload('snack')" style="padding: 12px; font-size: 0.95rem;">📸 간식 사진</button>
+            </div>
+
+            <div id="photoSection" class="hidden" style="margin-top: 20px;">
+                <label>식사 사진</label>
+                <div class="photo-grid" id="photoGrid"></div>
+            </div>
+
+            <div class="progress-section">
+                <h3 style="color: var(--primary); margin-bottom: 15px;">🎯 오늘의 영양소 목표</h3>
+                
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-label">단백질</span>
+                        <span class="progress-values"><span id="currentPro">0</span>g / <span id="goalPro">0</span>g</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar protein" id="barPro" style="width: 0%;">
+                            <span id="percentPro">0%</span>
+                        </div>
+                    </div>
+                    <div class="remaining-text" id="remainPro">-</div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-label">탄수화물</span>
+                        <span class="progress-values"><span id="currentCarb">0</span>g / <span id="goalCarb">0</span>g</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar carb" id="barCarb" style="width: 0%;">
+                            <span id="percentCarb">0%</span>
+                        </div>
+                    </div>
+                    <div class="remaining-text" id="remainCarb">-</div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-label">지방</span>
+                        <span class="progress-values"><span id="currentFat">0</span>g / <span id="goalFat">0</span>g</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar fat" id="barFat" style="width: 0%;">
+                            <span id="percentFat">0%</span>
+                        </div>
+                    </div>
+                    <div class="remaining-text" id="remainFat">-</div>
+                </div>
+
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-label">총 칼로리</span>
+                        <span class="progress-values"><span id="currentCal2">0</span> / <span id="goalCal2">0</span> kcal</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar protein" id="barCal" style="width: 0%;">
+                            <span id="percentCal">0%</span>
+                        </div>
+                    </div>
+                    <div class="remaining-text" id="remainCal">-</div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">총 칼로리</div>
+                    <div class="stat-value" id="totalCal">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">단백질</div>
+                    <div class="stat-value" id="totalPro">0g</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">탄수화물</div>
+                    <div class="stat-value" id="totalCarb">0g</div>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 20px;">
+                <label>💧 물 섭취량</label>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <input type="number" id="waterIntake" step="100" placeholder="0" value="0" style="flex: 1;" readonly>
+                    <span style="white-space: nowrap; font-weight: 700;">ml</span>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="addWater(100)" class="btn-clear" style="flex: 1; min-width: 70px;">+100ml</button>
+                    <button onclick="addWater(200)" class="btn-clear" style="flex: 1; min-width: 70px;">+200ml</button>
+                    <button onclick="addWater(300)" class="btn-clear" style="flex: 1; min-width: 70px;">+300ml</button>
+                    <button onclick="addWater(500)" class="btn-clear" style="flex: 1; min-width: 70px;">+500ml</button>
+                    <button onclick="resetWater()" class="btn-clear" style="background: #ffebee; color: #c62828;">초기화</button>
+                </div>
+                <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; text-align: center; font-size: 0.9rem; color: #1565c0;">
+                    💡 권장: 하루 2000ml (8잔)
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="exercise" style="width: auto;">
+                    <span>오늘 운동했어요! 💪</span>
+                </label>
+            </div>
+
+            <div class="input-group">
+                <label>메모</label>
+                <textarea id="memo" placeholder="오늘의 기록..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveRecord()">기록 저장</button>
+        </div>
+
+        <!-- 히스토리 -->
+        <div id="historyCard" class="card hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📊 기록 히스토리</h2>
+                <button class="btn btn-small btn-secondary" onclick="clearAll()">전체 삭제</button>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="btn btn-small" id="tabDaily" onclick="showTab('daily')" style="flex: 1; background: var(--accent); color: white;">일별 기록</button>
+                <button class="btn btn-small" id="tabWeekly" onclick="showTab('weekly')" style="flex: 1; background: #e0e0e0;">주간 통계</button>
+                <button class="btn btn-small" id="tabMonthly" onclick="showTab('monthly')" style="flex: 1; background: #e0e0e0;">월간 통계</button>
+            </div>
+
+            <div id="dailyTab">
+                <div id="historyList"></div>
+            </div>
+
+            <div id="weeklyTab" class="hidden">
+                <canvas id="weeklyChart" style="max-height: 300px; margin-bottom: 20px;"></canvas>
+                <div id="weeklyStats"></div>
+            </div>
+
+            <div id="monthlyTab" class="hidden">
+                <canvas id="monthlyChart" style="max-height: 300px; margin-bottom: 20px;"></canvas>
+                <div id="monthlyStats"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 -->
+    <div id="mealModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">식사 추가</h3>
+                <button class="close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="methodSelect">
+                    <div class="method-grid">
+                        <div class="method-btn" onclick="selectMethod('db')">
+                            <div class="method-icon">📋</div>
+                            <div>음식 선택</div>
+                        </div>
+                        <div class="method-btn" onclick="selectMethod('manual')">
+                            <div class="method-icon">✏️</div>
+                            <div>직접 입력</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dbSection" class="hidden">
+                    <button class="btn btn-small btn-secondary" onclick="backToMethod()" style="margin-bottom: 15px;">← 돌아가기</button>
+                    <div class="input-group">
+                        <input type="text" id="foodSearch" placeholder="음식 검색..." oninput="searchFood()">
+                    </div>
+                    <div class="food-list" id="foodList"></div>
+                    <div id="amountSection" class="hidden" style="margin-top: 15px;">
+                        <div class="input-group">
+                            <label>양 (g)</label>
+                            <input type="number" id="foodAmount" placeholder="100">
+                        </div>
+                        <button class="btn btn-primary" onclick="addFood()">추가</button>
+                    </div>
+                </div>
+
+                <div id="manualSection" class="hidden">
+                    <button class="btn btn-small btn-secondary" onclick="backToMethod()" style="margin-bottom: 15px;">← 돌아가기</button>
+                    <div class="input-group">
+                        <label>음식 이름</label>
+                        <input type="text" id="manualName" placeholder="치킨 샐러드">
+                    </div>
+                    <div class="input-group">
+                        <label>음식 사진 (선택)</label>
+                        <input type="file" id="manualPhoto" accept="image/*" onchange="previewManualPhoto()" style="padding: 8px;">
+                        <div id="manualPhotoPreview" style="margin-top: 10px;"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>양 (g)</label>
+                        <input type="number" id="manualAmount" placeholder="150">
+                    </div>
+                    <div class="input-group">
+                        <label>칼로리 (kcal)</label>
+                        <input type="number" id="manualCal" placeholder="200">
+                    </div>
+                    <div class="input-group">
+                        <label>단백질 (g)</label>
+                        <input type="number" id="manualPro" step="0.1" placeholder="20">
+                    </div>
+                    <div class="input-group">
+                        <label>탄수화물 (g)</label>
+                        <input type="number" id="manualCarb" step="0.1" placeholder="10">
+                    </div>
+                    <div class="input-group">
+                        <label>지방 (g)</label>
+                        <input type="number" id="manualFat" step="0.1" placeholder="8">
+                    </div>
+                    <div class="input-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="saveCustom" style="width: auto;">
+                            <span>나만의 음식에 저장 (100g 기준)</span>
+                        </label>
+                    </div>
+                    <button class="btn btn-primary" onclick="addManual()">추가</button>
+                </div>
+
+                <div id="addedSection" class="added-list hidden">
+                    <h3 style="margin-bottom: 15px;">추가된 음식</h3>
+                    <div id="addedList"></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <button class="btn btn-secondary" onclick="addPhoto()">📸 사진</button>
+                        <button class="btn btn-primary" onclick="saveMeal()">완료</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 물 섭취량 모달 -->
+    <div id="waterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💧 물 섭취량 기록</h3>
+                <button class="close" onclick="closeWaterModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 3rem; font-weight: 700; color: #1565c0;" id="waterDisplay">0ml</div>
+                    <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">권장: 하루 2000ml</div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+                    <button onclick="addWater(100)" class="btn btn-secondary">+100ml</button>
+                    <button onclick="addWater(200)" class="btn btn-secondary">+200ml</button>
+                    <button onclick="addWater(300)" class="btn btn-secondary">+300ml</button>
+                    <button onclick="addWater(500)" class="btn btn-secondary">+500ml</button>
+                </div>
+                <button onclick="resetWater()" class="btn" style="background: #ff6b6b; color: white; width: 100%;">초기화</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 즐겨찾기 모달 -->
+    <div id="favoritesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⭐ 즐겨찾기 음식</h3>
+                <button class="close" onclick="closeFavoritesModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="favoritesList"></div>
+                <div id="noFavorites" class="hidden" style="text-align: center; padding: 40px; color: #999;">
+                    즐겨찾기한 음식이 없습니다<br>
+                    <small>음식 선택 시 ⭐ 버튼을 눌러 즐겨찾기하세요</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 백업 모달 -->
+    <div id="backupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💾 데이터 백업/복원</h3>
+                <button class="close" onclick="closeBackupModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4 style="margin-bottom: 15px;">📥 데이터 백업</h4>
+                <p style="margin-bottom: 15px; color: #666; font-size: 0.9rem;">
+                    모든 기록을 파일로 저장합니다
+                </p>
+                <button onclick="backupData()" class="btn btn-primary" style="width: 100%; margin-bottom: 30px;">
+                    💾 백업 파일 다운로드
+                </button>
+
+                <h4 style="margin-bottom: 15px;">📤 데이터 복원</h4>
+                <p style="margin-bottom: 15px; color: #666; font-size: 0.9rem;">
+                    백업 파일에서 데이터를 불러옵니다
+                </p>
+                <input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData()">
+                <button onclick="document.getElementById('restoreFile').click()" class="btn btn-secondary" style="width: 100%;">
+                    📂 파일 선택
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 식단 템플릿 모달 -->
+    <div id="templateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📋 식단 템플릿</h3>
+                <button class="close" onclick="closeTemplateModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="templateList"></div>
+                <button onclick="saveCurrentAsTemplate()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    ➕ 현재 식사를 템플릿으로 저장
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 최근 음식 모달 -->
+    <div id="recentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🕐 최근 먹은 음식</h3>
+                <button class="close" onclick="closeRecentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="recentList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 영양소 차트 모달 -->
+    <div id="nutritionChartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 오늘의 영양소 균형</h3>
+                <button class="close" onclick="closeNutritionChartModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <canvas id="nutritionChart" style="max-height: 300px;"></canvas>
+                <div id="nutritionDetails" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 설정 모달 -->
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔔 알림 설정</h3>
+                <button class="close" onclick="closeNotificationModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #666; margin-bottom: 20px;">⚠️ 브라우저 알림 권한이 필요합니다</p>
+                
+                <div class="input-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="notifBreakfast" style="width: auto;">
+                        <span>아침 식사 알림</span>
+                    </label>
+                    <input type="time" id="timeBreakfast" value="09:00" style="margin-top: 10px;">
+                </div>
+
+                <div class="input-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="notifLunch" style="width: auto;">
+                        <span>점심 식사 알림</span>
+                    </label>
+                    <input type="time" id="timeLunch" value="13:00" style="margin-top: 10px;">
+                </div>
+
+                <div class="input-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="notifDinner" style="width: auto;">
+                        <span>저녁 식사 알림</span>
+                    </label>
+                    <input type="time" id="timeDinner" value="19:00" style="margin-top: 10px;">
+                </div>
+
+                <div class="input-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="notifWater" style="width: auto;">
+                        <span>물 섭취 알림 (2시간마다)</span>
+                    </label>
+                </div>
+
+                <button onclick="saveNotificationSettings()" class="btn btn-primary" style="width: 100%;">
+                    저장
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 기록 수정 모달 -->
+    <div id="editRecordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ 기록 수정</h3>
+                <button class="close" onclick="closeEditRecordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>체중 (kg)</label>
+                    <input type="number" id="editWeight" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>체지방률 (%)</label>
+                    <input type="number" id="editBodyFat" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>물 (ml)</label>
+                    <input type="number" id="editWater" step="100">
+                </div>
+                <div class="input-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="editExercise" style="width: auto;">
+                        <span>운동</span>
+                    </label>
+                </div>
+                <div class="input-group">
+                    <label>메모</label>
+                    <textarea id="editMemo"></textarea>
+                </div>
+                <button onclick="saveEditRecord()" class="btn btn-primary" style="width: 100%;">
+                    저장
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const foodDB = [
+            {name:"백미밥",cal:130,pro:2.5,carb:28,fat:0.3},
+            {name:"현미밥",cal:112,pro:2.6,carb:23.5,fat:0.9},
+            {name:"고구마",cal:86,pro:1,carb:20,fat:0.1},
+            {name:"감자",cal:77,pro:2,carb:17,fat:0.1},
+            {name:"식빵",cal:265,pro:8,carb:49,fat:3.5},
+            {name:"닭가슴살",cal:165,pro:31,carb:0,fat:3.6},
+            {name:"계란",cal:155,pro:13,carb:1.1,fat:11},
+            {name:"소고기",cal:140,pro:22,carb:0,fat:5.5},
+            {name:"두부",cal:76,pro:8,carb:1.9,fat:4.8},
+            {name:"우유",cal:61,pro:3.2,carb:4.8,fat:3.3},
+            {name:"브로콜리",cal:34,pro:2.8,carb:7,fat:0.4},
+            {name:"시금치",cal:23,pro:2.9,carb:3.6,fat:0.4},
+            {name:"토마토",cal:18,pro:0.9,carb:3.9,fat:0.2},
+            {name:"바나나",cal:89,pro:1.1,carb:23,fat:0.3},
+            {name:"사과",cal:52,pro:0.3,carb:14,fat:0.2},
+            {name:"아몬드",cal:579,pro:21,carb:22,fat:50},
+        ];
+
+        let currentMeal = '';
+        let mealData = {breakfast:[],lunch:[],dinner:[],snack:[]};
+        let photos = {breakfast:[],lunch:[],dinner:[],snack:[]};
+        let customDB = JSON.parse(localStorage.getItem('customFoods')||'[]');
+        let selected = null;
+        let manualPhotoData = null;
+        let dailyWater = 0;
+        let favorites = JSON.parse(localStorage.getItem('favorites')||'[]');
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        let templates = JSON.parse(localStorage.getItem('mealTemplates')||'[]');
+        let recentFoods = JSON.parse(localStorage.getItem('recentFoods')||'[]');
+        let nutritionChart = null;
+
+        function quickPhotoUpload(mealType) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'environment';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        photos[mealType].push(ev.target.result);
+                        updatePhotos();
+                        alert('사진이 추가되었습니다! 📸');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        function previewManualPhoto() {
+            const file = document.getElementById('manualPhoto').files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    manualPhotoData = e.target.result;
+                    document.getElementById('manualPhotoPreview').innerHTML = 
+                        `<img src="${manualPhotoData}" style="width: 100%; max-width: 200px; border-radius: 10px;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function toggleBodyFat() {
+            const input = document.getElementById('todayBodyFat');
+            const checkbox = document.getElementById('bodyFatUnknown');
+            if(checkbox.checked) {
+                input.disabled = true;
+                input.value = '';
+                input.style.background = '#f0f0f0';
+            } else {
+                input.disabled = false;
+                input.style.background = '#FAFAFA';
+            }
+        }
+
+        function init() {
+            const settings = JSON.parse(localStorage.getItem('settings')||'null');
+            if(settings) {
+                document.getElementById('settingsCard').classList.add('hidden');
+                document.getElementById('goalCard').classList.remove('hidden');
+                document.getElementById('recordCard').classList.remove('hidden');
+                document.getElementById('historyCard').classList.remove('hidden');
+                showGoals(settings);
+            } else {
+                document.getElementById('settingsCard').classList.remove('hidden');
+            }
+            loadHistory();
+            updateProgress();
+            
+            // 임시 데이터 로드
+            loadTempData();
+            
+            // 다크모드 초기화
+            if(isDarkMode) applyDarkMode();
+            
+            // 치팅데이 체크
+            checkCheatDayAlert();
+            
+            // 알림 설정
+            setupNotifications();
+        }
+
+        function saveSettings() {
+            const s = {
+                gender: document.getElementById('gender').value,
+                age: +document.getElementById('age').value,
+                height: +document.getElementById('height').value,
+                weight: +document.getElementById('currentWeight').value,
+                fat: +document.getElementById('bodyFat').value,
+                target: +document.getElementById('targetWeight').value,
+                activity: +document.getElementById('activityLevel').value
+            };
+            if(!s.age||!s.height||!s.weight||!s.fat||!s.target) {
+                alert('모든 항목을 입력해주세요!');
+                return;
+            }
+            localStorage.setItem('settings',JSON.stringify(s));
+            document.getElementById('settingsCard').classList.add('hidden');
+            document.getElementById('goalCard').classList.remove('hidden');
+            document.getElementById('recordCard').classList.remove('hidden');
+            document.getElementById('historyCard').classList.remove('hidden');
+            showGoals(s);
+            alert('설정 완료! 💪');
+        }
+
+        function showSettings() {
+            const s = JSON.parse(localStorage.getItem('settings'));
+            document.getElementById('gender').value = s.gender;
+            document.getElementById('age').value = s.age;
+            document.getElementById('height').value = s.height;
+            document.getElementById('currentWeight').value = s.weight;
+            document.getElementById('bodyFat').value = s.fat;
+            document.getElementById('targetWeight').value = s.target;
+            document.getElementById('activityLevel').value = s.activity;
+            document.getElementById('settingsCard').classList.remove('hidden');
+            document.getElementById('goalCard').classList.add('hidden');
+            document.getElementById('recordCard').classList.add('hidden');
+        }
+
+        function showGoals(s) {
+            const bmr = s.gender==='male' ? (10*s.weight)+(6.25*s.height)-(5*s.age)+5 : (10*s.weight)+(6.25*s.height)-(5*s.age)-161;
+            const tdee = bmr * s.activity;
+            const cal = Math.round(tdee - 500);
+            const lm = s.weight * (1 - s.fat/100);
+            const pro = Math.round(lm * 2.2);
+            const fat = Math.round((cal * 0.27)/9);
+            const carb = Math.round((cal - pro*4 - fat*9)/4);
+            const diff = s.weight - s.target;
+            const days = Math.ceil(diff/0.5)*7;
+
+            document.getElementById('dispCurrent').textContent = s.weight+'kg';
+            document.getElementById('dispTarget').textContent = s.target+'kg';
+            document.getElementById('dispDiff').textContent = diff.toFixed(1)+'kg';
+            document.getElementById('dispDays').textContent = days+'일';
+            document.getElementById('dispCal').textContent = cal;
+            document.getElementById('dispPro').textContent = pro+'g';
+            document.getElementById('dispCarb').textContent = carb+'g';
+
+            // 목표값 저장
+            localStorage.setItem('goals', JSON.stringify({cal, pro, carb, fat}));
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const goals = JSON.parse(localStorage.getItem('goals')||'{}');
+            if(!goals.cal) return;
+
+            let cal=0, pro=0, carb=0, fat=0;
+            Object.values(mealData).forEach(m=>m.forEach(f=>{
+                cal+=f.cal;
+                pro+=f.pro;
+                carb+=f.carb;
+                fat+=f.fat;
+            }));
+
+            pro = Math.round(pro*10)/10;
+            carb = Math.round(carb*10)/10;
+            fat = Math.round(fat*10)/10;
+
+            // 목표값 표시
+            document.getElementById('goalPro').textContent = goals.pro;
+            document.getElementById('goalCarb').textContent = goals.carb;
+            document.getElementById('goalFat').textContent = goals.fat;
+            document.getElementById('goalCal2').textContent = goals.cal;
+
+            // 현재값 표시
+            document.getElementById('currentPro').textContent = pro;
+            document.getElementById('currentCarb').textContent = carb;
+            document.getElementById('currentFat').textContent = fat;
+            document.getElementById('currentCal2').textContent = cal;
+
+            // 진행률 계산
+            const proPer = Math.min((pro / goals.pro * 100), 100);
+            const carbPer = Math.min((carb / goals.carb * 100), 100);
+            const fatPer = Math.min((fat / goals.fat * 100), 100);
+            const calPer = Math.min((cal / goals.cal * 100), 100);
+
+            // 프로그레스 바 업데이트
+            updateBar('Pro', pro, goals.pro, proPer);
+            updateBar('Carb', carb, goals.carb, carbPer);
+            updateBar('Fat', fat, goals.fat, fatPer);
+            updateBar('Cal', cal, goals.cal, calPer);
+        }
+
+        function updateBar(type, current, goal, percent) {
+            const bar = document.getElementById('bar'+type);
+            const percentSpan = document.getElementById('percent'+type);
+            const remain = document.getElementById('remain'+type);
+            
+            bar.style.width = percent + '%';
+            percentSpan.textContent = Math.round(percent) + '%';
+            
+            const diff = goal - current;
+            const isOver = current > goal;
+            const isComplete = percent >= 100;
+
+            if(isOver) {
+                bar.classList.add('over');
+                remain.textContent = `⚠️ ${Math.abs(diff).toFixed(1)}${type==='Cal'?'kcal':'g'} 초과`;
+                remain.className = 'remaining-text over';
+            } else if(isComplete) {
+                remain.textContent = '✅ 목표 달성!';
+                remain.className = 'remaining-text complete';
+            } else {
+                bar.classList.remove('over');
+                remain.textContent = `${diff.toFixed(1)}${type==='Cal'?'kcal':'g'} 남음`;
+                remain.className = 'remaining-text';
+            }
+        }
+
+        function openMeal(type) {
+            currentMeal = type;
+            const names = {breakfast:'아침',lunch:'점심',dinner:'저녁',snack:'간식'};
+            document.getElementById('modalTitle').textContent = names[type]+' 추가';
+            document.getElementById('mealModal').style.display = 'block';
+            backToMethod();
+            updateAdded();
+        }
+
+        function closeModal() {
+            document.getElementById('mealModal').style.display = 'none';
+        }
+
+        function selectMethod(m) {
+            document.getElementById('methodSelect').classList.add('hidden');
+            if(m==='db') {
+                document.getElementById('dbSection').classList.remove('hidden');
+                renderFoods();
+            } else {
+                document.getElementById('manualSection').classList.remove('hidden');
+            }
+        }
+
+        function backToMethod() {
+            document.getElementById('methodSelect').classList.remove('hidden');
+            document.getElementById('dbSection').classList.add('hidden');
+            document.getElementById('manualSection').classList.add('hidden');
+            document.getElementById('amountSection').classList.add('hidden');
+            selected = null;
+        }
+
+        function renderFoods(q='') {
+            const all = [...foodDB,...customDB];
+            const filtered = q ? all.filter(f=>f.name.includes(q)) : all;
+            document.getElementById('foodList').innerHTML = filtered.map((f,i)=>`
+                <div class="food-item" onclick="selectFood(${i})">
+                    ${f.photo ? `<img src="${f.photo}" class="food-item-photo">` : ''}
+                    <div class="food-item-content">
+                        <div class="food-name">${f.name}</div>
+                        <div class="food-info">${f.cal}kcal | P:${f.pro}g C:${f.carb}g F:${f.fat}g (100g)</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchFood() {
+            renderFoods(document.getElementById('foodSearch').value);
+        }
+
+        function selectFood(i) {
+            const all = [...foodDB,...customDB];
+            selected = all[i];
+            document.querySelectorAll('.food-item').forEach((el,idx)=>{
+                el.classList.toggle('selected',idx===i);
+            });
+            document.getElementById('amountSection').classList.remove('hidden');
+            document.getElementById('foodAmount').value = '100';
+        }
+
+        function addFood() {
+            if(!selected) return alert('음식을 선택하세요!');
+            const amt = +document.getElementById('foodAmount').value;
+            if(!amt) return alert('양을 입력하세요!');
+            const r = amt/100;
+            mealData[currentMeal].push({
+                name:selected.name,
+                amount:amt,
+                cal:Math.round(selected.cal*r),
+                pro:Math.round(selected.pro*r*10)/10,
+                carb:Math.round(selected.carb*r*10)/10,
+                fat:Math.round(selected.fat*r*10)/10
+            });
+            addToRecent(selected.name);
+            selected = null;
+            document.getElementById('foodAmount').value = '';
+            document.getElementById('amountSection').classList.add('hidden');
+            updateAdded();
+            backToMethod();
+        }
+
+        function addManual() {
+            const name = document.getElementById('manualName').value;
+            const amt = +document.getElementById('manualAmount').value;
+            const cal = +document.getElementById('manualCal').value;
+            const pro = +document.getElementById('manualPro').value;
+            const carb = +document.getElementById('manualCarb').value;
+            const fat = +document.getElementById('manualFat').value;
+            
+            if(!name||!amt||cal===undefined||pro===undefined||carb===undefined||fat===undefined) {
+                return alert('모든 항목을 입력하세요!');
+            }
+
+            if(document.getElementById('saveCustom').checked) {
+                const r = 100/amt;
+                customDB.push({
+                    name,
+                    cal:Math.round(cal*r),
+                    pro:Math.round(pro*r*10)/10,
+                    carb:Math.round(carb*r*10)/10,
+                    fat:Math.round(fat*r*10)/10,
+                    photo: manualPhotoData
+                });
+                localStorage.setItem('customFoods',JSON.stringify(customDB));
+            }
+
+            mealData[currentMeal].push({name,amount:amt,cal:Math.round(cal),pro:Math.round(pro*10)/10,carb:Math.round(carb*10)/10,fat:Math.round(fat*10)/10});
+            
+            document.getElementById('manualName').value = '';
+            document.getElementById('manualAmount').value = '';
+            document.getElementById('manualCal').value = '';
+            document.getElementById('manualPro').value = '';
+            document.getElementById('manualCarb').value = '';
+            document.getElementById('manualFat').value = '';
+            document.getElementById('saveCustom').checked = false;
+            document.getElementById('manualPhoto').value = '';
+            document.getElementById('manualPhotoPreview').innerHTML = '';
+            manualPhotoData = null;
+
+            updateAdded();
+            backToMethod();
+        }
+
+        function updateAdded() {
+            const foods = mealData[currentMeal];
+            const pics = photos[currentMeal];
+            
+            // 임시 저장
+            saveTempData();
+            
+            if(foods.length===0 && pics.length===0) {
+                document.getElementById('addedSection').classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('addedSection').classList.remove('hidden');
+            let html = '';
+            
+            if(pics.length>0) {
+                html += '<div style="margin-bottom:15px;"><strong>사진</strong><div class="photo-grid">';
+                pics.forEach(p=>html+=`<img src="${p}" class="photo-item">`);
+                html += '</div></div>';
+            }
+
+            if(foods.length>0) {
+                html += '<div><strong>음식</strong>';
+                foods.forEach((f,i)=>html+=`
+                    <div class="added-item">
+                        <div>
+                            <div style="font-weight:700;">${f.name} (${f.amount}g)</div>
+                            <div style="font-size:0.85rem;opacity:0.8;">${f.cal}kcal | P:${f.pro}g C:${f.carb}g F:${f.fat}g</div>
+                        </div>
+                        <button onclick="removeFood(${i})" style="background:#ff6b6b;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">삭제</button>
+                    </div>
+                `);
+                html += '</div>';
+            }
+
+            document.getElementById('addedList').innerHTML = html;
+        }
+
+        function removeFood(i) {
+            mealData[currentMeal].splice(i,1);
+            updateAdded();
+        }
+
+        function addPhoto() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if(file) {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        photos[currentMeal].push(ev.target.result);
+                        updateAdded();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        function saveMeal() {
+            updateCounts();
+            updateTotals();
+            updatePhotos();
+            closeModal();
+        }
+
+        function updateCounts() {
+            document.getElementById('breakfastCount').textContent = `(${mealData.breakfast.length})`;
+            document.getElementById('lunchCount').textContent = `(${mealData.lunch.length})`;
+            document.getElementById('dinnerCount').textContent = `(${mealData.dinner.length})`;
+            document.getElementById('snackCount').textContent = `(${mealData.snack.length})`;
+        }
+
+        function updateTotals() {
+            let cal=0,pro=0,carb=0,fat=0;
+            Object.values(mealData).forEach(m=>m.forEach(f=>{
+                cal+=f.cal;
+                pro+=f.pro;
+                carb+=f.carb;
+                fat+=f.fat;
+            }));
+            document.getElementById('totalCal').textContent = cal;
+            document.getElementById('totalPro').textContent = Math.round(pro*10)/10+'g';
+            document.getElementById('totalCarb').textContent = Math.round(carb*10)/10+'g';
+            
+            updateProgress();
+        }
+
+        function updatePhotos() {
+            const all = [...photos.breakfast,...photos.lunch,...photos.dinner,...photos.snack];
+            if(all.length>0) {
+                document.getElementById('photoSection').classList.remove('hidden');
+                document.getElementById('photoGrid').innerHTML = all.map(p=>`<img src="${p}" class="photo-item">`).join('');
+            } else {
+                document.getElementById('photoSection').classList.add('hidden');
+            }
+        }
+
+        function saveRecord() {
+            const w = document.getElementById('todayWeight').value;
+            const bf = document.getElementById('todayBodyFat').value;
+            if(!w) return alert('체중을 입력하세요!');
+
+            let cal=0,pro=0,carb=0,fat=0;
+            Object.values(mealData).forEach(m=>m.forEach(f=>{
+                cal+=f.cal;
+                pro+=f.pro;
+                carb+=f.carb;
+                fat+=f.fat;
+            }));
+
+            const rec = {
+                date: new Date().toISOString(),
+                weight: +w,
+                bodyFat: bf ? +bf : null,
+                water: dailyWater,
+                meals: JSON.parse(JSON.stringify(mealData)),
+                photos: JSON.parse(JSON.stringify(photos)),
+                cal, pro: Math.round(pro*10)/10, carb: Math.round(carb*10)/10, fat: Math.round(fat*10)/10,
+                exercise: document.getElementById('exercise').checked,
+                memo: document.getElementById('memo').value
+            };
+
+            let recs = JSON.parse(localStorage.getItem('records')||'[]');
+            recs.unshift(rec);
+            localStorage.setItem('records',JSON.stringify(recs));
+
+            document.getElementById('todayWeight').value = '';
+            document.getElementById('todayBodyFat').value = '';
+            document.getElementById('todayBodyFat').disabled = false;
+            document.getElementById('todayBodyFat').style.background = '#FAFAFA';
+            document.getElementById('bodyFatUnknown').checked = false;
+            document.getElementById('exercise').checked = false;
+            document.getElementById('memo').value = '';
+            dailyWater = 0;
+            mealData = {breakfast:[],lunch:[],dinner:[],snack:[]};
+            photos = {breakfast:[],lunch:[],dinner:[],snack:[]};
+            
+            // 임시 데이터 삭제
+            clearTempData();
+            
+            updateCounts();
+            updateTotals();
+            updatePhotos();
+            loadHistory();
+            alert('기록 완료! 💪');
+        }
+
+        function loadHistory() {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            if(recs.length===0) {
+                document.getElementById('historyList').innerHTML = '<p style="text-align:center;color:#999;padding:40px;">기록이 없습니다</p>';
+                return;
+            }
+            document.getElementById('historyList').innerHTML = recs.map((r,idx)=>{
+                const d = new Date(r.date);
+                const ds = d.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+                let html = `<div class="history-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div class="history-date">${ds}</div>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="editRecord(${idx})" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">✏️ 수정</button>
+                            <button onclick="deleteRecord(${idx})" style="padding: 6px 12px; background: #ff6b6b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">🗑️ 삭제</button>
+                        </div>
+                    </div>`;
+                
+                if(r.photos) {
+                    const allP = [...(r.photos.breakfast||[]),...(r.photos.lunch||[]),...(r.photos.dinner||[]),...(r.photos.snack||[])];
+                    if(allP.length>0) {
+                        html += '<div class="photo-grid" style="margin:10px 0;">';
+                        allP.forEach(p=>html+=`<img src="${p}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">`);
+                        html += '</div>';
+                    }
+                }
+                
+                html += `<div class="history-grid">
+                    <div>체중: <strong>${r.weight}kg</strong></div>
+                    ${r.bodyFat ? `<div>체지방: <strong>${r.bodyFat}%</strong></div>` : ''}
+                    ${r.water ? `<div>물: <strong>${r.water}ml</strong></div>` : ''}
+                    <div>칼로리: <strong>${r.cal}kcal</strong></div>
+                    <div>단백질: <strong>${r.pro}g</strong></div>
+                    <div>탄수화물: <strong>${r.carb}g</strong></div>
+                    <div>지방: <strong>${r.fat||0}g</strong></div>
+                    <div>운동: <strong>${r.exercise?'✅':'❌'}</strong></div>
+                </div>`;
+                
+                if(r.memo) html += `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #e0e0e0;font-size:0.9rem;color:#666;">${r.memo}</div>`;
+                html += '</div>';
+                return html;
+            }).join('');
+        }
+
+        function clearAll() {
+            if(confirm('모든 기록을 삭제하시겠습니까?')) {
+                localStorage.removeItem('records');
+                loadHistory();
+            }
+        }
+
+        let weeklyChart = null;
+        let monthlyChart = null;
+
+        function showTab(tab) {
+            document.getElementById('dailyTab').classList.toggle('hidden', tab !== 'daily');
+            document.getElementById('weeklyTab').classList.toggle('hidden', tab !== 'weekly');
+            document.getElementById('monthlyTab').classList.toggle('hidden', tab !== 'monthly');
+            
+            document.getElementById('tabDaily').style.background = tab === 'daily' ? 'var(--accent)' : '#e0e0e0';
+            document.getElementById('tabDaily').style.color = tab === 'daily' ? 'white' : 'var(--primary)';
+            document.getElementById('tabWeekly').style.background = tab === 'weekly' ? 'var(--accent)' : '#e0e0e0';
+            document.getElementById('tabWeekly').style.color = tab === 'weekly' ? 'white' : 'var(--primary)';
+            document.getElementById('tabMonthly').style.background = tab === 'monthly' ? 'var(--accent)' : '#e0e0e0';
+            document.getElementById('tabMonthly').style.color = tab === 'monthly' ? 'white' : 'var(--primary)';
+
+            if(tab === 'weekly') showWeeklyStats();
+            if(tab === 'monthly') showMonthlyStats();
+        }
+
+        function showWeeklyStats() {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            if(recs.length === 0) {
+                document.getElementById('weeklyStats').innerHTML = '<p style="text-align:center;color:#999;padding:40px;">기록이 없습니다</p>';
+                return;
+            }
+
+            // 최근 7일 데이터
+            const last7 = recs.slice(0, 7).reverse();
+            const dates = last7.map(r => new Date(r.date).toLocaleDateString('ko-KR', {month:'short',day:'numeric'}));
+            const weights = last7.map(r => r.weight);
+            const bodyFats = last7.map(r => r.bodyFat || null);
+            const cals = last7.map(r => r.cal);
+
+            if(weeklyChart) weeklyChart.destroy();
+
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            weeklyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: '체중 (kg)',
+                        data: weights,
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255,107,107,0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }, {
+                        label: '체지방률 (%)',
+                        data: bodyFats,
+                        borderColor: '#f7b731',
+                        backgroundColor: 'rgba(247,183,49,0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1',
+                        spanGaps: true
+                    }, {
+                        label: '칼로리 (kcal)',
+                        data: cals,
+                        borderColor: '#4ecdc4',
+                        backgroundColor: 'rgba(78,205,196,0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y2'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '체중 (kg)' }},
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '체지방률 (%)' }, grid: { drawOnChartArea: false }},
+                        y2: { type: 'linear', display: false, position: 'right' }
+                    }
+                }
+            });
+
+            // 주간 통계
+            const avgWeight = (weights.reduce((a,b)=>a+b,0)/weights.length).toFixed(1);
+            const validBodyFats = bodyFats.filter(bf => bf !== null);
+            const avgBodyFat = validBodyFats.length > 0 ? (validBodyFats.reduce((a,b)=>a+b,0)/validBodyFats.length).toFixed(1) : '-';
+            const avgCal = Math.round(cals.reduce((a,b)=>a+b,0)/cals.length);
+            const weightChange = (weights[weights.length-1] - weights[0]).toFixed(1);
+            const exerciseDays = last7.filter(r=>r.exercise).length;
+
+            document.getElementById('weeklyStats').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">평균 체중</div>
+                        <div class="stat-value">${avgWeight}kg</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">체중 변화</div>
+                        <div class="stat-value">${weightChange>0?'+':''}${weightChange}kg</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">평균 체지방</div>
+                        <div class="stat-value">${avgBodyFat}${avgBodyFat !== '-' ? '%' : ''}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">평균 칼로리</div>
+                        <div class="stat-value">${avgCal}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">운동 일수</div>
+                        <div class="stat-value">${exerciseDays}일</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">평균 단백질</div>
+                        <div class="stat-value">${(last7.reduce((a,r)=>a+r.pro,0)/last7.length).toFixed(1)}g</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showMonthlyStats() {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            if(recs.length === 0) {
+                document.getElementById('monthlyStats').innerHTML = '<p style="text-align:center;color:#999;padding:40px;">기록이 없습니다</p>';
+                return;
+            }
+
+            // 최근 30일 데이터
+            const last30 = recs.slice(0, 30).reverse();
+            const dates = last30.map(r => new Date(r.date).toLocaleDateString('ko-KR', {month:'short',day:'numeric'}));
+            const weights = last30.map(r => r.weight);
+            const bodyFats = last30.map(r => r.bodyFat || null);
+            const cals = last30.map(r => r.cal);
+
+            if(monthlyChart) monthlyChart.destroy();
+
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: '체중 (kg)',
+                        data: weights,
+                        borderColor: '#ff6b6b',
+                        backgroundColor: 'rgba(255,107,107,0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }, {
+                        label: '체지방률 (%)',
+                        data: bodyFats,
+                        borderColor: '#f7b731',
+                        backgroundColor: 'rgba(247,183,49,0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y1',
+                        spanGaps: true
+                    }, {
+                        label: '칼로리 (kcal)',
+                        data: cals,
+                        borderColor: '#4ecdc4',
+                        backgroundColor: 'rgba(78,205,196,0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y2'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: '체중 (kg)' }},
+                        y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: '체지방률 (%)' }, grid: { drawOnChartArea: false }},
+                        y2: { type: 'linear', display: false, position: 'right' }
+                    }
+                }
+            });
+
+            // 월간 통계
+            const avgWeight = (weights.reduce((a,b)=>a+b,0)/weights.length).toFixed(1);
+            const validBodyFats = bodyFats.filter(bf => bf !== null);
+            const avgBodyFat = validBodyFats.length > 0 ? (validBodyFats.reduce((a,b)=>a+b,0)/validBodyFats.length).toFixed(1) : '-';
+            const avgCal = Math.round(cals.reduce((a,b)=>a+b,0)/cals.length);
+            const weightChange = (weights[weights.length-1] - weights[0]).toFixed(1);
+            const exerciseDays = last30.filter(r=>r.exercise).length;
+            const totalDays = last30.length;
+
+            document.getElementById('monthlyStats').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">평균 체중</div>
+                        <div class="stat-value">${avgWeight}kg</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">체중 변화</div>
+                        <div class="stat-value">${weightChange>0?'+':''}${weightChange}kg</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">평균 체지방</div>
+                        <div class="stat-value">${avgBodyFat}${avgBodyFat !== '-' ? '%' : ''}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">평균 칼로리</div>
+                        <div class="stat-value">${avgCal}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">운동 일수</div>
+                        <div class="stat-value">${exerciseDays}/${totalDays}일</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">평균 단백질</div>
+                        <div class="stat-value">${(last30.reduce((a,r)=>a+r.pro,0)/last30.length).toFixed(1)}g</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 15px;">
+                    <h3 style="margin-bottom: 15px; color: var(--primary);">📈 한 달 요약</h3>
+                    <div style="display: grid; gap: 10px; font-size: 0.95rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>총 기록 일수:</span>
+                            <strong>${totalDays}일</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>운동 달성률:</span>
+                            <strong>${Math.round(exerciseDays/totalDays*100)}%</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>최고 체중:</span>
+                            <strong>${Math.max(...weights)}kg</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>최저 체중:</span>
+                            <strong>${Math.min(...weights)}kg</strong>
+                        </div>
+                        ${validBodyFats.length > 0 ? `
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>체지방 변화:</span>
+                            <strong>${(validBodyFats[validBodyFats.length-1] - validBodyFats[0]).toFixed(1)}%</strong>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        init();
+    </script>
+    <script>
+        // PWA Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed'));
+            });
+        }
+
+        // 설치 프롬프트
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // 설치 안내 표시
+            const installBanner = document.createElement('div');
+            installBanner.innerHTML = `
+                <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; text-align: center;">
+                    <p style="margin-bottom: 15px; font-weight: 700; color: var(--primary);">📱 앱으로 설치하시겠어요?</p>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="installPWA()" style="flex: 1; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">설치하기</button>
+                        <button onclick="closeBanner()" style="flex: 1; padding: 12px; background: #e0e0e0; color: var(--primary); border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">나중에</button>
+                    </div>
+                </div>
+            `;
+            installBanner.id = 'installBanner';
+            document.body.appendChild(installBanner);
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                    closeBanner();
+                });
+            }
+        }
+
+        function closeBanner() {
+            const banner = document.getElementById('installBanner');
+            if (banner) banner.remove();
+        }
+
+        // === 물 섭취량 기능 ===
+        function openWaterModal() { document.getElementById('waterModal').style.display = 'block'; updateWaterDisplay(); }
+        function closeWaterModal() { document.getElementById('waterModal').style.display = 'none'; }
+        function addWater(amount) { dailyWater += amount; updateWaterDisplay(); }
+        function resetWater() { dailyWater = 0; updateWaterDisplay(); }
+        function updateWaterDisplay() { document.getElementById('waterDisplay').textContent = dailyWater + 'ml'; }
+
+        // === 즐겨찾기 기능 ===
+        function openFavoritesModal() { document.getElementById('favoritesModal').style.display = 'block'; renderFavorites(); }
+        function closeFavoritesModal() { document.getElementById('favoritesModal').style.display = 'none'; }
+        function toggleFavorite(foodName) { const idx = favorites.indexOf(foodName); if(idx > -1) favorites.splice(idx, 1); else favorites.push(foodName); localStorage.setItem('favorites', JSON.stringify(favorites)); }
+        function renderFavorites() { const all = [...foodDB, ...customDB]; const favFoods = all.filter(f => favorites.includes(f.name)); if(favFoods.length === 0) { document.getElementById('favoritesList').classList.add('hidden'); document.getElementById('noFavorites').classList.remove('hidden'); return; } document.getElementById('favoritesList').classList.remove('hidden'); document.getElementById('noFavorites').classList.add('hidden'); document.getElementById('favoritesList').innerHTML = favFoods.map(f=>`<div class="food-item" style="display: flex; justify-content: space-between;"><div style="flex: 1;"><div class="food-name">${f.name}</div><div class="food-info">${f.cal}kcal | P:${f.pro}g C:${f.carb}g F:${f.fat}g</div></div><button onclick="toggleFavorite('${f.name}'); renderFavorites();" style="background: none; border: none; font-size: 1.5rem;">⭐</button></div>`).join(''); }
+
+        // === 백업/복원 기능 ===
+        function openBackupModal() { document.getElementById('backupModal').style.display = 'block'; }
+        function closeBackupModal() { document.getElementById('backupModal').style.display = 'none'; }
+        function backupData() { const data = { settings: localStorage.getItem('settings'), records: localStorage.getItem('records'), customFoods: localStorage.getItem('customFoods'), favorites: localStorage.getItem('favorites'), goals: localStorage.getItem('goals'), backupDate: new Date().toISOString() }; const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `fit-tracker-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(url); alert('백업 완료! 💾'); }
+        function restoreData() { const file = document.getElementById('restoreFile').files[0]; if(!file) return; const reader = new FileReader(); reader.onload = e => { try { const data = JSON.parse(e.target.result); if(confirm('기존 데이터를 덮어씁니다. 계속?')) { if(data.settings) localStorage.setItem('settings', data.settings); if(data.records) localStorage.setItem('records', data.records); if(data.customFoods) localStorage.setItem('customFoods', data.customFoods); if(data.favorites) localStorage.setItem('favorites', data.favorites); if(data.goals) localStorage.setItem('goals', data.goals); alert('복원 완료! 새로고침합니다.'); location.reload(); } } catch{ alert('잘못된 파일입니다.'); } }; reader.readAsText(file); }
+
+        // === 다크모드 기능 ===
+        // === 임시 저장 기능 ===
+        function saveTempData() {
+            const today = new Date().toDateString();
+            const tempData = {
+                date: today,
+                mealData: mealData,
+                photos: photos,
+                water: dailyWater
+            };
+            localStorage.setItem('tempTodayData', JSON.stringify(tempData));
+        }
+
+        function loadTempData() {
+            const temp = JSON.parse(localStorage.getItem('tempTodayData')||'null');
+            if(!temp) return;
+            
+            const today = new Date().toDateString();
+            if(temp.date === today) {
+                mealData = temp.mealData || {breakfast:[],lunch:[],dinner:[],snack:[]};
+                photos = temp.photos || {breakfast:[],lunch:[],dinner:[],snack:[]};
+                dailyWater = temp.water || 0;
+                updateCounts();
+                updateTotals();
+                updatePhotos();
+            }
+        }
+
+        function clearTempData() {
+            localStorage.removeItem('tempTodayData');
+        }
+
+        // === 기록 수정/삭제 기능 ===
+        let editingIndex = null;
+
+        function editRecord(idx) {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            const rec = recs[idx];
+            editingIndex = idx;
+            
+            document.getElementById('editWeight').value = rec.weight;
+            document.getElementById('editBodyFat').value = rec.bodyFat || '';
+            document.getElementById('editWater').value = rec.water || 0;
+            document.getElementById('editExercise').checked = rec.exercise || false;
+            document.getElementById('editMemo').value = rec.memo || '';
+            
+            document.getElementById('editRecordModal').style.display = 'block';
+        }
+
+        function closeEditRecordModal() {
+            document.getElementById('editRecordModal').style.display = 'none';
+            editingIndex = null;
+        }
+
+        function saveEditRecord() {
+            if(editingIndex === null) return;
+            
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            const rec = recs[editingIndex];
+            
+            rec.weight = +document.getElementById('editWeight').value;
+            rec.bodyFat = document.getElementById('editBodyFat').value ? +document.getElementById('editBodyFat').value : null;
+            rec.water = +document.getElementById('editWater').value;
+            rec.exercise = document.getElementById('editExercise').checked;
+            rec.memo = document.getElementById('editMemo').value;
+            
+            localStorage.setItem('records', JSON.stringify(recs));
+            closeEditRecordModal();
+            loadHistory();
+            alert('수정 완료! ✅');
+        }
+
+        function deleteRecord(idx) {
+            if(!confirm('이 기록을 삭제하시겠습니까?')) return;
+            
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            recs.splice(idx, 1);
+            localStorage.setItem('records', JSON.stringify(recs));
+            loadHistory();
+            alert('삭제 완료! 🗑️');
+        }
+
+        function toggleDarkMode() { isDarkMode = !isDarkMode; localStorage.setItem('darkMode', isDarkMode); isDarkMode ? applyDarkMode() : removeDarkMode(); }
+        function applyDarkMode() { document.body.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)'; document.querySelectorAll('.card').forEach(c => { c.style.background = '#34495e'; c.style.color = '#ecf0f1'; }); document.querySelectorAll('h2, label').forEach(e => e.style.color = '#ecf0f1'); document.querySelectorAll('input, select, textarea').forEach(i => { i.style.background = '#2c3e50'; i.style.color = '#ecf0f1'; i.style.borderColor = '#7f8c8d'; }); document.getElementById('darkModeBtn').textContent = '☀️ 라이트'; }
+        function removeDarkMode() { document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; document.querySelectorAll('.card').forEach(c => { c.style.background = '#ffffff'; c.style.color = '#1a1a2e'; }); document.querySelectorAll('h2, label').forEach(e => e.style.color = '#1a1a2e'); document.querySelectorAll('input, select, textarea').forEach(i => { i.style.background = '#ffffff'; i.style.color = '#000000'; i.style.borderColor = '#e0e0e0'; }); document.getElementById('darkModeBtn').textContent = '🌙 다크모드'; }
+
+        // === 식단 템플릿 기능 ===
+        function openTemplateModal() { document.getElementById('templateModal').style.display = 'block'; renderTemplates(); }
+        function closeTemplateModal() { document.getElementById('templateModal').style.display = 'none'; }
+        function saveCurrentAsTemplate() {
+            const name = prompt('템플릿 이름:');
+            if(!name) return;
+            const template = { name, foods: JSON.parse(JSON.stringify(mealData[currentMeal])) };
+            templates.push(template);
+            localStorage.setItem('mealTemplates', JSON.stringify(templates));
+            alert('템플릿 저장 완료!');
+            renderTemplates();
+        }
+        function renderTemplates() {
+            if(templates.length === 0) {
+                document.getElementById('templateList').innerHTML = '<p style="text-align:center;color:#999;padding:40px;">저장된 템플릿이 없습니다</p>';
+                return;
+            }
+            document.getElementById('templateList').innerHTML = templates.map((t,i)=>`
+                <div class="food-item" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div onclick="applyTemplate(${i})" style="flex: 1; cursor: pointer;">
+                        <div class="food-name">${t.name}</div>
+                        <div class="food-info">${t.foods.length}개 음식</div>
+                    </div>
+                    <button onclick="deleteTemplate(${i})" style="background: #ff6b6b; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">삭제</button>
+                </div>
+            `).join('');
+        }
+        function applyTemplate(idx) {
+            mealData[currentMeal] = JSON.parse(JSON.stringify(templates[idx].foods));
+            updateAdded();
+            updateCounts();
+            updateTotals();
+            closeTemplateModal();
+            alert('템플릿 적용 완료!');
+        }
+        function deleteTemplate(idx) {
+            if(confirm('템플릿을 삭제하시겠습니까?')) {
+                templates.splice(idx, 1);
+                localStorage.setItem('mealTemplates', JSON.stringify(templates));
+                renderTemplates();
+            }
+        }
+
+        // === 최근 먹은 음식 기능 ===
+        function openRecentModal() { document.getElementById('recentModal').style.display = 'block'; renderRecent(); }
+        function closeRecentModal() { document.getElementById('recentModal').style.display = 'none'; }
+        function addToRecent(foodName) {
+            recentFoods = recentFoods.filter(f => f !== foodName);
+            recentFoods.unshift(foodName);
+            if(recentFoods.length > 20) recentFoods = recentFoods.slice(0, 20);
+            localStorage.setItem('recentFoods', JSON.stringify(recentFoods));
+        }
+        function renderRecent() {
+            const all = [...foodDB, ...customDB];
+            const recent = recentFoods.map(name => all.find(f => f.name === name)).filter(f => f);
+            if(recent.length === 0) {
+                document.getElementById('recentList').innerHTML = '<p style="text-align:center;color:#999;padding:40px;">최근 기록이 없습니다</p>';
+                return;
+            }
+            document.getElementById('recentList').innerHTML = recent.map(f=>`
+                <div class="food-item" onclick="quickAddFood('${f.name}')">
+                    ${f.photo ? `<img src="${f.photo}" class="food-item-photo">` : ''}
+                    <div class="food-item-content">
+                        <div class="food-name">${f.name}</div>
+                        <div class="food-info">${f.cal}kcal | P:${f.pro}g C:${f.carb}g F:${f.fat}g</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function quickAddFood(name) {
+            const all = [...foodDB, ...customDB];
+            const food = all.find(f => f.name === name);
+            if(!food) return;
+            const amt = 100;
+            const r = amt/100;
+            mealData[currentMeal].push({
+                name: food.name,
+                amount: amt,
+                cal: Math.round(food.cal*r),
+                pro: Math.round(food.pro*r*10)/10,
+                carb: Math.round(food.carb*r*10)/10,
+                fat: Math.round(food.fat*r*10)/10
+            });
+            addToRecent(name);
+            updateAdded();
+            updateCounts();
+            updateTotals();
+            closeRecentModal();
+        }
+
+        // === 영양소 차트 기능 ===
+        function openNutritionChartModal() {
+            document.getElementById('nutritionChartModal').style.display = 'block';
+            renderNutritionChart();
+        }
+        function closeNutritionChartModal() {
+            document.getElementById('nutritionChartModal').style.display = 'none';
+        }
+        function renderNutritionChart() {
+            let cal=0,pro=0,carb=0,fat=0;
+            Object.values(mealData).forEach(m=>m.forEach(f=>{
+                cal+=f.cal;
+                pro+=f.pro;
+                carb+=f.carb;
+                fat+=f.fat;
+            }));
+            
+            const goals = JSON.parse(localStorage.getItem('goals')||'{}');
+            
+            if(nutritionChart) nutritionChart.destroy();
+            
+            const ctx = document.getElementById('nutritionChart').getContext('2d');
+            nutritionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['단백질', '탄수화물', '지방'],
+                    datasets: [{
+                        data: [pro*4, carb*4, fat*9],
+                        backgroundColor: ['#667eea', '#f093fb', '#4ecdc4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            
+            document.getElementById('nutritionDetails').innerHTML = `
+                <div style="display: grid; gap: 15px;">
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <div style="font-weight: 700; margin-bottom: 5px;">단백질</div>
+                        <div>${pro.toFixed(1)}g / ${goals.pro || '-'}g (${goals.pro ? Math.round(pro/goals.pro*100) : 0}%)</div>
+                    </div>
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <div style="font-weight: 700; margin-bottom: 5px;">탄수화물</div>
+                        <div>${carb.toFixed(1)}g / ${goals.carb || '-'}g (${goals.carb ? Math.round(carb/goals.carb*100) : 0}%)</div>
+                    </div>
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <div style="font-weight: 700; margin-bottom: 5px;">지방</div>
+                        <div>${fat.toFixed(1)}g / ${goals.fat || '-'}g</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // === 알림 설정 기능 ===
+        function openNotificationModal() {
+            document.getElementById('notificationModal').style.display = 'block';
+            loadNotificationSettings();
+        }
+        function closeNotificationModal() {
+            document.getElementById('notificationModal').style.display = 'none';
+        }
+        function loadNotificationSettings() {
+            const settings = JSON.parse(localStorage.getItem('notifSettings')||'{}');
+            document.getElementById('notifBreakfast').checked = settings.breakfast || false;
+            document.getElementById('notifLunch').checked = settings.lunch || false;
+            document.getElementById('notifDinner').checked = settings.dinner || false;
+            document.getElementById('notifWater').checked = settings.water || false;
+            document.getElementById('timeBreakfast').value = settings.timeBreakfast || '09:00';
+            document.getElementById('timeLunch').value = settings.timeLunch || '13:00';
+            document.getElementById('timeDinner').value = settings.timeDinner || '19:00';
+        }
+        function saveNotificationSettings() {
+            if('Notification' in window && Notification.permission !== 'granted') {
+                Notification.requestPermission().then(permission => {
+                    if(permission === 'granted') saveSettings();
+                    else alert('알림 권한이 필요합니다');
+                });
+            } else {
+                saveSettings();
+            }
+            
+            function saveSettings() {
+                const settings = {
+                    breakfast: document.getElementById('notifBreakfast').checked,
+                    lunch: document.getElementById('notifLunch').checked,
+                    dinner: document.getElementById('notifDinner').checked,
+                    water: document.getElementById('notifWater').checked,
+                    timeBreakfast: document.getElementById('timeBreakfast').value,
+                    timeLunch: document.getElementById('timeLunch').value,
+                    timeDinner: document.getElementById('timeDinner').value
+                };
+                localStorage.setItem('notifSettings', JSON.stringify(settings));
+                alert('알림 설정 저장 완료!');
+                closeNotificationModal();
+                setupNotifications();
+            }
+        }
+        function setupNotifications() {
+            const settings = JSON.parse(localStorage.getItem('notifSettings')||'{}');
+            // 간단한 알림 체크 (실제 구현은 Service Worker 필요)
+            if(settings.breakfast || settings.lunch || settings.dinner) {
+                console.log('알림 설정됨:', settings);
+            }
+        }
+
+        // === 치팅데이 알림 기능 ===
+        function checkCheatDayAlert() {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            const goals = JSON.parse(localStorage.getItem('goals')||'{}');
+            if(recs.length < 7 || !goals.cal) return;
+            
+            const last7 = recs.slice(0, 7);
+            const deficitDays = last7.filter(r => r.cal < goals.cal).length;
+            
+            if(deficitDays >= 7) {
+                const cheatMsg = document.createElement('div');
+                cheatMsg.innerHTML = `
+                    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; max-width: 500px; width: 90%;">
+                        <div style="font-size: 2.5rem; margin-bottom: 10px;">🍕 치팅데이 추천!</div>
+                        
+                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left;">
+                            <div style="font-weight: 700; margin-bottom: 10px;">⚠️ 정체기 방지 필요</div>
+                            <div style="font-size: 0.9rem;">7일 연속 칼로리 부족 상태입니다.<br>내일은 유지칼로리로 식사하세요!</div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left;">
+                            <div style="font-weight: 700; margin-bottom: 10px;">🍚 탄수화물 위주로!</div>
+                            <div style="font-size: 0.9rem; line-height: 1.6;">
+                                • 목표 칼로리: <strong>${Math.round(goals.cal + 500)}kcal</strong><br>
+                                • 탄수화물을 평소보다 많이 (파스타, 피자, 빵, 과일)<br>
+                                • 단백질/지방은 평소대로 유지<br>
+                                • 이유: 글리코겐 재충전으로 대사 회복 💪
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left;">
+                            <div style="font-weight: 700; margin-bottom: 8px;">🍝 추천 음식</div>
+                            <div style="font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                                <div>• 피자</div>
+                                <div>• 파스타</div>
+                                <div>• 빵류</div>
+                                <div>• 과일</div>
+                                <div>• 고구마</div>
+                                <div>• 국수</div>
+                                <div>• 초밥</div>
+                            </div>
+                        </div>
+
+                        <button onclick="this.parentElement.parentElement.remove()" style="width: 100%; background: white; color: #f5576c; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem;">
+                            확인했어요!
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(cheatMsg);
+            }
+        }
+    </script>
+</body>
+</html>
