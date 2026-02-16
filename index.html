@@ -787,10 +787,31 @@
             </div>
 
             <div class="input-group">
-                <label style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="exercise" style="width: auto;">
-                    <span>오늘 운동했어요! 💪</span>
-                </label>
+                <label>🚶‍♂️ 걸음 수</label>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <input type="number" id="steps" placeholder="0" readonly style="flex: 1;">
+                    <span style="white-space: nowrap;">보</span>
+                </div>
+                <button onclick="getStepsFromHealth()" class="btn btn-secondary" style="width: 100%;">
+                    📱 건강 앱에서 가져오기
+                </button>
+                <div id="stepsInfo" style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; font-size: 0.9rem; display: none;">
+                    <div>소모 칼로리: <strong id="stepsBurnedCal">0</strong>kcal</div>
+                    <div style="margin-top: 5px; color: #666; font-size: 0.85rem;">※ 걸음 수 × 0.04kcal로 계산</div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>💪 운동 기록</label>
+                <button onclick="openExerciseModal()" class="btn btn-secondary" style="width: 100%;">
+                    ➕ 운동 추가
+                </button>
+                <div id="exerciseList" style="margin-top: 10px;"></div>
+                <div id="totalBurnedInfo" style="margin-top: 10px; padding: 15px; background: #fff3e0; border-radius: 8px; font-size: 0.95rem; display: none;">
+                    <div style="font-weight: 700; color: #f57c00; margin-bottom: 5px;">총 소모 칼로리</div>
+                    <div style="font-size: 1.2rem; font-weight: 700; color: #e65100;"><strong id="totalBurnedCal">0</strong>kcal</div>
+                    <div style="margin-top: 5px; color: #666; font-size: 0.85rem;">걸음 + 운동</div>
+                </div>
             </div>
 
             <div class="input-group">
@@ -799,6 +820,85 @@
             </div>
 
             <button class="btn btn-primary" onclick="saveRecord()">기록 저장</button>
+        </div>
+
+        <!-- 운동 추가 모달 -->
+        <div id="exerciseModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>💪 운동 추가</h3>
+                    <button class="close" onclick="closeExerciseModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <label>운동 종류</label>
+                        <select id="exerciseType" onchange="updateExerciseMET()">
+                            <optgroup label="🏃 유산소">
+                                <option value="3.0">걷기 (느리게)</option>
+                                <option value="4.5">걷기 (빠르게)</option>
+                                <option value="7.0">조깅</option>
+                                <option value="8.0">달리기 (8km/h)</option>
+                                <option value="10.0">달리기 (10km/h)</option>
+                                <option value="12.0">달리기 (12km/h)</option>
+                                <option value="9.0">트레드밀 (경사)</option>
+                            </optgroup>
+                            <optgroup label="🚴 사이클">
+                                <option value="5.5">실내자전거 (가볍게)</option>
+                                <option value="6.8">실내자전거 (보통)</option>
+                                <option value="8.5">실내자전거 (격렬)</option>
+                                <option value="7.5">야외 사이클 (평지)</option>
+                                <option value="10.0">야외 사이클 (언덕)</option>
+                            </optgroup>
+                            <optgroup label="💪 근력">
+                                <option value="3.0">웨이트 (가볍게)</option>
+                                <option value="5.0">웨이트 (보통)</option>
+                                <option value="6.0">웨이트 (격렬)</option>
+                                <option value="3.5">맨몸 운동</option>
+                                <option value="8.0">크로스핏</option>
+                            </optgroup>
+                            <optgroup label="🥊 격투기">
+                                <option value="6.0">복싱 (샌드백)</option>
+                                <option value="9.0">복싱 (스파링)</option>
+                                <option value="10.0">킥복싱</option>
+                                <option value="8.0">태권도</option>
+                                <option value="9.0">유도/주짓수</option>
+                            </optgroup>
+                            <optgroup label="🏊 수영">
+                                <option value="6.0">수영 (천천히)</option>
+                                <option value="8.0">수영 (보통)</option>
+                                <option value="10.0">수영 (격렬)</option>
+                                <option value="5.0">아쿠아로빅</option>
+                            </optgroup>
+                            <optgroup label="⚽ 구기종목">
+                                <option value="7.0">축구</option>
+                                <option value="6.5">농구</option>
+                                <option value="4.0">배구</option>
+                                <option value="7.0">테니스</option>
+                                <option value="5.5">배드민턴</option>
+                                <option value="4.0">탁구</option>
+                            </optgroup>
+                            <optgroup label="🧘 기타">
+                                <option value="3.0">요가</option>
+                                <option value="3.0">필라테스</option>
+                                <option value="2.5">스트레칭</option>
+                                <option value="7.0">등산</option>
+                                <option value="8.0">계단 오르기</option>
+                                <option value="12.0">줄넘기</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>운동 시간 (분)</label>
+                        <input type="number" id="exerciseMinutes" value="30" min="1">
+                    </div>
+                    <div id="exerciseCalPreview" style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                        <div style="color: #666; font-size: 0.9rem;">예상 소모 칼로리</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);" id="previewCal">0kcal</div>
+                        <div style="color: #999; font-size: 0.85rem; margin-top: 5px;">MET × 체중 × 시간</div>
+                    </div>
+                    <button onclick="addExercise()" class="btn btn-primary" style="width: 100%;">추가</button>
+                </div>
+            </div>
         </div>
 
         <!-- 히스토리 -->
@@ -848,6 +948,23 @@
                             <div class="method-icon">✏️</div>
                             <div>직접 입력</div>
                         </div>
+                        <div class="method-btn" onclick="selectMethod('quick')">
+                            <div class="method-icon">⚡</div>
+                            <div>간편 입력</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="quickSection" class="hidden">
+                    <button class="btn btn-small btn-secondary" onclick="backToMethod()" style="margin-bottom: 15px;">← 돌아가기</button>
+                    <h4 style="margin-bottom: 15px;">얼마나 드셨나요?</h4>
+                    <div style="display: grid; gap: 10px;">
+                        <button onclick="addQuickMeal('가볍게', 300)" class="btn" style="background: #4ecdc4; color: white; padding: 15px; font-size: 1rem;">🟢 가볍게 (300kcal)</button>
+                        <button onclick="addQuickMeal('보통', 500)" class="btn" style="background: #ffe66d; color: #333; padding: 15px; font-size: 1rem;">🟡 보통 (500kcal)</button>
+                        <button onclick="addQuickMeal('든든하게', 700)" class="btn" style="background: #ffa07a; color: white; padding: 15px; font-size: 1rem;">🟠 든든하게 (700kcal)</button>
+                        <button onclick="addQuickMeal('많이', 1000)" class="btn" style="background: #ff6b6b; color: white; padding: 15px; font-size: 1rem;">🔴 많이 (1000kcal)</button>
+                        <button onclick="addQuickMeal('진짜 많이', 1500)" class="btn" style="background: #9b59b6; color: white; padding: 15px; font-size: 1rem;">🟣 진짜 많이 (1500kcal)</button>
+                        <button onclick="addQuickMeal('배 터져죽어', 2000)" class="btn" style="background: #2c3e50; color: white; padding: 15px; font-size: 1rem;">💀 배 터져죽어 (2000kcal)</button>
                     </div>
                 </div>
 
@@ -926,10 +1043,44 @@
                 <button class="close" onclick="closeWaterModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 3rem; font-weight: 700; color: #1565c0;" id="waterDisplay">0ml</div>
-                    <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">권장: 하루 2000ml</div>
+                <!-- 물병 시각화 -->
+                <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                    <div style="position: relative; width: 120px; height: 250px;">
+                        <!-- 물병 테두리 -->
+                        <svg width="120" height="250" style="position: absolute; top: 0; left: 0;">
+                            <!-- 병 몸통 -->
+                            <rect x="20" y="50" width="80" height="180" fill="none" stroke="#90caf9" stroke-width="3" rx="10"/>
+                            <!-- 병 목 -->
+                            <rect x="40" y="30" width="40" height="25" fill="none" stroke="#90caf9" stroke-width="3" rx="5"/>
+                            <!-- 병 뚜껑 -->
+                            <rect x="45" y="15" width="30" height="20" fill="#90caf9" rx="3"/>
+                            
+                            <!-- 눈금선 -->
+                            <line x1="20" y1="100" x2="15" y2="100" stroke="#b0bec5" stroke-width="1"/>
+                            <text x="5" y="105" font-size="10" fill="#666">75%</text>
+                            <line x1="20" y1="140" x2="15" y2="140" stroke="#b0bec5" stroke-width="1"/>
+                            <text x="5" y="145" font-size="10" fill="#666">50%</text>
+                            <line x1="20" y1="180" x2="15" y2="180" stroke="#b0bec5" stroke-width="1"/>
+                            <text x="5" y="185" font-size="10" fill="#666">25%</text>
+                        </svg>
+                        
+                        <!-- 물 채우기 -->
+                        <div id="waterFill" style="position: absolute; bottom: 20px; left: 23px; width: 74px; background: linear-gradient(180deg, #4fc3f7 0%, #0288d1 100%); border-radius: 0 0 8px 8px; transition: height 0.5s ease, box-shadow 0.5s ease; height: 0px;">
+                        </div>
+                        
+                        <!-- 물결 효과 -->
+                        <div id="waterWave" style="position: absolute; bottom: 20px; left: 23px; width: 74px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 50%; opacity: 0; transition: all 0.5s ease;"></div>
+                    </div>
                 </div>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 2rem; font-weight: 700; color: #1565c0;" id="waterDisplay">0ml</div>
+                    <div style="font-size: 1.2rem; color: #0288d1; font-weight: 600; margin-top: 5px;" id="waterGoal">목표: 2000ml</div>
+                    <div style="margin-top: 10px;">
+                        <div style="font-size: 2.5rem;" id="waterPercent">0%</div>
+                    </div>
+                </div>
+                
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
                     <button onclick="addWater(100)" class="btn btn-secondary">+100ml</button>
                     <button onclick="addWater(200)" class="btn btn-secondary">+200ml</button>
@@ -1366,6 +1517,8 @@
             if(m==='db') {
                 document.getElementById('dbSection').classList.remove('hidden');
                 renderFoods();
+            } else if(m==='quick') {
+                document.getElementById('quickSection').classList.remove('hidden');
             } else {
                 document.getElementById('manualSection').classList.remove('hidden');
             }
@@ -1375,6 +1528,7 @@
             document.getElementById('methodSelect').classList.remove('hidden');
             document.getElementById('dbSection').classList.add('hidden');
             document.getElementById('manualSection').classList.add('hidden');
+            document.getElementById('quickSection').classList.add('hidden');
             document.getElementById('amountSection').classList.add('hidden');
             selected = null;
         }
@@ -1454,6 +1608,36 @@
             }
 
             mealData[currentMeal].push({name,amount:amt,cal:Math.round(cal),pro:Math.round(pro*10)/10,carb:Math.round(carb*10)/10,fat:Math.round(fat*10)/10});
+            
+            document.getElementById('manualName').value = '';
+            document.getElementById('manualAmount').value = '';
+            document.getElementById('manualCal').value = '';
+            document.getElementById('manualPro').value = '';
+            document.getElementById('manualCarb').value = '';
+            document.getElementById('manualFat').value = '';
+            document.getElementById('saveCustom').checked = false;
+            manualPhotoData = null;
+            updateAdded();
+            updateCounts();
+            updateTotals();
+            backToMethod();
+        }
+
+        function addQuickMeal(name, cal) {
+            mealData[currentMeal].push({
+                name: name,
+                amount: 1,
+                cal: cal,
+                pro: 0,
+                carb: 0,
+                fat: 0
+            });
+            updateAdded();
+            updateCounts();
+            updateTotals();
+            closeModal();
+            alert(`${name} 추가 완료! (${cal}kcal)`);
+        }
             
             document.getElementById('manualName').value = '';
             document.getElementById('manualAmount').value = '';
@@ -1583,15 +1767,23 @@
                 fat+=f.fat;
             }));
 
+            const exerciseBurned = exercises.reduce((sum, ex) => sum + ex.burned, 0);
+            const totalBurned = stepsBurnedCalories + exerciseBurned;
+            
             const rec = {
                 date: new Date().toISOString(),
                 weight: +w,
                 bodyFat: bf ? +bf : null,
                 water: dailyWater,
+                steps: todaySteps,
+                stepsBurnedCal: stepsBurnedCalories,
+                exercises: JSON.parse(JSON.stringify(exercises)),
+                exerciseBurnedCal: exerciseBurned,
+                totalBurnedCal: totalBurned,
                 meals: JSON.parse(JSON.stringify(mealData)),
                 photos: JSON.parse(JSON.stringify(photos)),
                 cal, pro: Math.round(pro*10)/10, carb: Math.round(carb*10)/10, fat: Math.round(fat*10)/10,
-                exercise: document.getElementById('exercise').checked,
+                netCal: cal - totalBurned,
                 memo: document.getElementById('memo').value
             };
 
@@ -1604,9 +1796,15 @@
             document.getElementById('todayBodyFat').disabled = false;
             document.getElementById('todayBodyFat').style.background = '#FAFAFA';
             document.getElementById('bodyFatUnknown').checked = false;
-            document.getElementById('exercise').checked = false;
             document.getElementById('memo').value = '';
+            document.getElementById('steps').value = '';
+            document.getElementById('stepsInfo').style.display = 'none';
+            document.getElementById('totalBurnedInfo').style.display = 'none';
             dailyWater = 0;
+            todaySteps = 0;
+            stepsBurnedCalories = 0;
+            exercises = [];
+            renderExercises();
             mealData = {breakfast:[],lunch:[],dinner:[],snack:[]};
             photos = {breakfast:[],lunch:[],dinner:[],snack:[]};
             
@@ -1651,12 +1849,30 @@
                     <div>체중: <strong>${r.weight}kg</strong></div>
                     ${r.bodyFat ? `<div>체지방: <strong>${r.bodyFat}%</strong></div>` : ''}
                     ${r.water ? `<div>물: <strong>${r.water}ml</strong></div>` : ''}
-                    <div>칼로리: <strong>${r.cal}kcal</strong></div>
+                    <div>섭취: <strong>${r.cal}kcal</strong></div>
+                    ${r.totalBurnedCal ? `<div style="color: #f57c00;">소모: <strong>${r.totalBurnedCal}kcal</strong></div>` : ''}
+                    ${r.totalBurnedCal ? `<div style="color: #2e7d32; font-weight: 700;">순칼로리: <strong>${r.netCal || (r.cal - r.totalBurnedCal)}kcal</strong></div>` : ''}
                     <div>단백질: <strong>${r.pro}g</strong></div>
                     <div>탄수화물: <strong>${r.carb}g</strong></div>
                     <div>지방: <strong>${r.fat||0}g</strong></div>
-                    <div>운동: <strong>${r.exercise?'✅':'❌'}</strong></div>
                 </div>`;
+                
+                // 운동 상세 내역
+                if(r.exercises && r.exercises.length > 0) {
+                    html += '<div style="margin-top: 10px; padding: 10px; background: #fff3e0; border-radius: 8px;">';
+                    html += '<div style="font-weight: 700; color: #f57c00; margin-bottom: 8px;">💪 운동 기록</div>';
+                    if(r.steps) {
+                        html += `<div style="font-size: 0.9rem; margin-bottom: 5px;">🚶‍♂️ 걸음: ${r.steps.toLocaleString()}보 (${r.stepsBurnedCal}kcal)</div>`;
+                    }
+                    r.exercises.forEach(ex => {
+                        html += `<div style="font-size: 0.9rem; margin-bottom: 5px;">• ${ex.name} ${ex.minutes}분 (${ex.burned}kcal)</div>`;
+                    });
+                    html += '</div>';
+                } else if(r.steps) {
+                    html += '<div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px;">';
+                    html += `<div style="font-size: 0.9rem;">🚶‍♂️ 걸음: ${r.steps.toLocaleString()}보 (${r.stepsBurnedCal || r.burnedCal}kcal)</div>`;
+                    html += '</div>';
+                }
                 
                 if(r.memo) html += `<div style="margin-top:10px;padding-top:10px;border-top:1px solid #e0e0e0;font-size:0.9rem;color:#666;">${r.memo}</div>`;
                 html += '</div>';
@@ -1955,11 +2171,60 @@
         }
 
         // === 물 섭취량 기능 ===
-        function openWaterModal() { document.getElementById('waterModal').style.display = 'block'; updateWaterDisplay(); }
+        // === 물 섭취량 기능 ===
+        function openWaterModal() { 
+            document.getElementById('waterModal').style.display = 'block'; 
+            updateWaterDisplay(); 
+        }
         function closeWaterModal() { document.getElementById('waterModal').style.display = 'none'; }
-        function addWater(amount) { dailyWater += amount; updateWaterDisplay(); }
-        function resetWater() { dailyWater = 0; updateWaterDisplay(); }
-        function updateWaterDisplay() { document.getElementById('waterDisplay').textContent = dailyWater + 'ml'; }
+        function addWater(amount) { 
+            dailyWater += amount; 
+            updateWaterDisplay(); 
+        }
+        function resetWater() { 
+            dailyWater = 0; 
+            updateWaterDisplay(); 
+        }
+        function updateWaterDisplay() {
+            // 개인 맞춤 목표량 계산
+            const settings = JSON.parse(localStorage.getItem('settings')||'{}');
+            const weight = settings.weight || 70;
+            const gender = settings.gender || 'male';
+            const multiplier = gender === 'male' ? 35 : 30;
+            const goalWater = weight * multiplier;
+            
+            // 표시 업데이트
+            document.getElementById('waterDisplay').textContent = dailyWater + 'ml';
+            document.getElementById('waterGoal').textContent = `목표: ${goalWater}ml`;
+            
+            // 퍼센트 계산
+            const percent = Math.min(Math.round((dailyWater / goalWater) * 100), 100);
+            document.getElementById('waterPercent').textContent = percent + '%';
+            
+            // 물병 높이 계산 (최대 180px)
+            const fillHeight = Math.min((dailyWater / goalWater) * 180, 180);
+            const fillElement = document.getElementById('waterFill');
+            const waveElement = document.getElementById('waterWave');
+            
+            fillElement.style.height = fillHeight + 'px';
+            
+            // 물결 위치 조정
+            if(fillHeight > 0) {
+                waveElement.style.bottom = (20 + fillHeight - 4) + 'px';
+                waveElement.style.opacity = '1';
+            } else {
+                waveElement.style.opacity = '0';
+            }
+            
+            // 목표 달성 효과
+            if(percent >= 100) {
+                fillElement.style.boxShadow = '0 0 20px rgba(3, 169, 244, 0.8)';
+                waveElement.style.animation = 'wave 2s infinite';
+            } else {
+                fillElement.style.boxShadow = 'none';
+                waveElement.style.animation = 'none';
+            }
+        }
 
         // === 즐겨찾기 기능 ===
         function openFavoritesModal() { document.getElementById('favoritesModal').style.display = 'block'; renderFavorites(); }
@@ -2004,6 +2269,155 @@
         function clearTempData() {
             localStorage.removeItem('tempTodayData');
         }
+
+        // === 건강 앱 연동 (걸음 수) ===
+        let todaySteps = 0;
+        let stepsBurnedCalories = 0;
+        let exercises = [];
+
+        function getStepsFromHealth() {
+            // iOS Motion & Fitness API 사용
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            requestHealthData();
+                        } else {
+                            alert('Motion 권한이 필요합니다. 설정에서 허용해주세요.');
+                        }
+                    })
+                    .catch(err => {
+                        // iOS 12 이하는 권한 요청 없이 바로 시도
+                        requestHealthData();
+                    });
+            } else {
+                requestHealthData();
+            }
+        }
+
+        function requestHealthData() {
+            // Web Health API (실험적 기능)
+            if ('health' in navigator) {
+                navigator.health.queryStepCount({
+                    startTime: new Date().setHours(0,0,0,0),
+                    endTime: Date.now()
+                }).then(steps => {
+                    todaySteps = steps;
+                    updateStepsDisplay();
+                }).catch(err => {
+                    // 권한 없거나 지원 안 함
+                    showManualStepsInput();
+                });
+            } else {
+                // Web Health API 지원 안 함 - 수동 입력
+                showManualStepsInput();
+            }
+        }
+
+        function showManualStepsInput() {
+            const steps = prompt('오늘 걸음 수를 입력하세요:', '0');
+            if (steps !== null) {
+                todaySteps = parseInt(steps) || 0;
+                updateStepsDisplay();
+            }
+        }
+
+        function updateStepsDisplay() {
+            document.getElementById('steps').value = todaySteps;
+            stepsBurnedCalories = Math.round(todaySteps * 0.04); // 1보당 약 0.04kcal
+            document.getElementById('stepsBurnedCal').textContent = stepsBurnedCalories;
+            document.getElementById('stepsInfo').style.display = 'block';
+            updateTotalBurned();
+        }
+
+        // === 운동 기록 기능 ===
+        function openExerciseModal() {
+            document.getElementById('exerciseModal').style.display = 'block';
+            updateExerciseMET();
+        }
+
+        function closeExerciseModal() {
+            document.getElementById('exerciseModal').style.display = 'none';
+        }
+
+        function updateExerciseMET() {
+            const met = parseFloat(document.getElementById('exerciseType').value);
+            const minutes = parseInt(document.getElementById('exerciseMinutes').value) || 30;
+            const settings = JSON.parse(localStorage.getItem('settings')||'{}');
+            const weight = settings.weight || 70;
+            
+            const hours = minutes / 60;
+            const burned = Math.round(met * weight * hours);
+            
+            document.getElementById('previewCal').textContent = burned + 'kcal';
+        }
+
+        function addExercise() {
+            const select = document.getElementById('exerciseType');
+            const met = parseFloat(select.value);
+            const name = select.options[select.selectedIndex].text;
+            const minutes = parseInt(document.getElementById('exerciseMinutes').value) || 30;
+            
+            const settings = JSON.parse(localStorage.getItem('settings')||'{}');
+            const weight = settings.weight || 70;
+            
+            const hours = minutes / 60;
+            const burned = Math.round(met * weight * hours);
+            
+            exercises.push({
+                name,
+                met,
+                minutes,
+                burned
+            });
+            
+            renderExercises();
+            updateTotalBurned();
+            closeExerciseModal();
+        }
+
+        function renderExercises() {
+            if(exercises.length === 0) {
+                document.getElementById('exerciseList').innerHTML = '';
+                return;
+            }
+            
+            document.getElementById('exerciseList').innerHTML = exercises.map((ex, idx) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700;">${ex.name}</div>
+                        <div style="font-size: 0.85rem; color: #666;">${ex.minutes}분 · ${ex.burned}kcal</div>
+                    </div>
+                    <button onclick="removeExercise(${idx})" style="background: #ff6b6b; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer;">삭제</button>
+                </div>
+            `).join('');
+        }
+
+        function removeExercise(idx) {
+            exercises.splice(idx, 1);
+            renderExercises();
+            updateTotalBurned();
+        }
+
+        function updateTotalBurned() {
+            const exerciseBurned = exercises.reduce((sum, ex) => sum + ex.burned, 0);
+            const totalBurned = stepsBurnedCalories + exerciseBurned;
+            
+            if(totalBurned > 0) {
+                document.getElementById('totalBurnedCal').textContent = totalBurned;
+                document.getElementById('totalBurnedInfo').style.display = 'block';
+            } else {
+                document.getElementById('totalBurnedInfo').style.display = 'none';
+            }
+        }
+
+        // 운동 시간 변경 시 미리보기 업데이트
+        document.addEventListener('DOMContentLoaded', () => {
+            const minInput = document.getElementById('exerciseMinutes');
+            if(minInput) {
+                minInput.addEventListener('input', updateExerciseMET);
+            }
+        });
 
         // === 기록 수정/삭제 기능 ===
         let editingIndex = null;
