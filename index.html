@@ -1376,6 +1376,8 @@
         }
 
         function saveSettings() {
+            console.log('saveSettings 호출됨');
+            
             const s = {
                 gender: document.getElementById('gender').value,
                 age: +document.getElementById('age').value,
@@ -1386,16 +1388,26 @@
                 targetFat: +document.getElementById('targetBodyFat').value || 0,
                 activity: +document.getElementById('activityLevel').value
             };
+            
+            console.log('입력값:', s);
+            
             if(!s.age||!s.height||!s.weight||!s.target) {
-                alert('필수 항목을 입력해주세요!');
+                alert('필수 항목을 입력해주세요!\n나이:' + s.age + '\n키:' + s.height + '\n체중:' + s.weight + '\n목표:' + s.target);
                 return;
             }
+            
+            console.log('저장 시작');
             localStorage.setItem('settings',JSON.stringify(s));
+            
+            console.log('카드 전환 시작');
             document.getElementById('settingsCard').classList.add('hidden');
             document.getElementById('goalCard').classList.remove('hidden');
             document.getElementById('recordCard').classList.remove('hidden');
             document.getElementById('historyCard').classList.remove('hidden');
+            
+            console.log('showGoals 호출');
             showGoals(s);
+            
             alert('설정 완료! 💪');
         }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fit-tracker-v17';
+const CACHE_NAME = 'fit-tracker-v18';
 const urlsToCache = [
   './체중관리앱.html',
   'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nanum+Gothic:wght@400;700;800&display=swap',
