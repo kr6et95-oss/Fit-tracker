@@ -1659,21 +1659,6 @@
             closeModal();
             alert(`${name} 추가 완료! (${cal}kcal)`);
         }
-            
-            document.getElementById('manualName').value = '';
-            document.getElementById('manualAmount').value = '';
-            document.getElementById('manualCal').value = '';
-            document.getElementById('manualPro').value = '';
-            document.getElementById('manualCarb').value = '';
-            document.getElementById('manualFat').value = '';
-            document.getElementById('saveCustom').checked = false;
-            document.getElementById('manualPhoto').value = '';
-            document.getElementById('manualPhotoPreview').innerHTML = '';
-            manualPhotoData = null;
-
-            updateAdded();
-            backToMethod();
-        }
 
         function updateAdded() {
             const foods = mealData[currentMeal];
