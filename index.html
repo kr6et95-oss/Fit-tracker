@@ -588,6 +588,10 @@
                 <input type="number" id="targetWeight" step="0.1" placeholder="65">
             </div>
             <div class="input-group">
+                <label>목표 체지방률 (%) - 선택</label>
+                <input type="number" id="targetBodyFat" step="0.1" placeholder="15">
+            </div>
+            <div class="input-group">
                 <label>활동 수준</label>
                 <select id="activityLevel">
                     <option value="1.2">거의 안 움직임 - 사무직, 하루 종일 앉아서 일함</option>
@@ -1379,10 +1383,11 @@
                 weight: +document.getElementById('currentWeight').value,
                 fat: +document.getElementById('bodyFat').value || 0,
                 target: +document.getElementById('targetWeight').value,
+                targetFat: +document.getElementById('targetBodyFat').value || 0,
                 activity: +document.getElementById('activityLevel').value
             };
             if(!s.age||!s.height||!s.weight||!s.target) {
-                alert('모든 항목을 입력해주세요!');
+                alert('필수 항목을 입력해주세요!');
                 return;
             }
             localStorage.setItem('settings',JSON.stringify(s));
@@ -1400,8 +1405,9 @@
             document.getElementById('age').value = s.age;
             document.getElementById('height').value = s.height;
             document.getElementById('currentWeight').value = s.weight;
-            document.getElementById('bodyFat').value = s.fat;
+            document.getElementById('bodyFat').value = s.fat || '';
             document.getElementById('targetWeight').value = s.target;
+            document.getElementById('targetBodyFat').value = s.targetFat || '';
             document.getElementById('activityLevel').value = s.activity;
             document.getElementById('settingsCard').classList.remove('hidden');
             document.getElementById('goalCard').classList.add('hidden');
