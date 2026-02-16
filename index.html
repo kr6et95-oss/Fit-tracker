@@ -2657,25 +2657,28 @@
             document.getElementById('timeDinner').value = settings.timeDinner || '19:00';
         }
         function saveNotificationSettings() {
+            const settings = {
+                breakfast: document.getElementById('notifBreakfast').checked,
+                lunch: document.getElementById('notifLunch').checked,
+                dinner: document.getElementById('notifDinner').checked,
+                water: document.getElementById('notifWater').checked,
+                timeBreakfast: document.getElementById('timeBreakfast').value,
+                timeLunch: document.getElementById('timeLunch').value,
+                timeDinner: document.getElementById('timeDinner').value
+            };
+            
             if('Notification' in window && Notification.permission !== 'granted') {
                 Notification.requestPermission().then(permission => {
-                    if(permission === 'granted') saveSettings();
-                    else alert('알림 권한이 필요합니다');
+                    if(permission === 'granted') {
+                        localStorage.setItem('notifSettings', JSON.stringify(settings));
+                        alert('알림 설정 저장 완료!');
+                        closeNotificationModal();
+                        setupNotifications();
+                    } else {
+                        alert('알림 권한이 필요합니다');
+                    }
                 });
             } else {
-                saveSettings();
-            }
-            
-            function saveSettings() {
-                const settings = {
-                    breakfast: document.getElementById('notifBreakfast').checked,
-                    lunch: document.getElementById('notifLunch').checked,
-                    dinner: document.getElementById('notifDinner').checked,
-                    water: document.getElementById('notifWater').checked,
-                    timeBreakfast: document.getElementById('timeBreakfast').value,
-                    timeLunch: document.getElementById('timeLunch').value,
-                    timeDinner: document.getElementById('timeDinner').value
-                };
                 localStorage.setItem('notifSettings', JSON.stringify(settings));
                 alert('알림 설정 저장 완료!');
                 closeNotificationModal();
