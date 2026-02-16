@@ -1377,11 +1377,11 @@
                 age: +document.getElementById('age').value,
                 height: +document.getElementById('height').value,
                 weight: +document.getElementById('currentWeight').value,
-                fat: +document.getElementById('bodyFat').value,
+                fat: +document.getElementById('bodyFat').value || 0,
                 target: +document.getElementById('targetWeight').value,
                 activity: +document.getElementById('activityLevel').value
             };
-            if(!s.age||!s.height||!s.weight||!s.fat||!s.target) {
+            if(!s.age||!s.height||!s.weight||!s.target) {
                 alert('모든 항목을 입력해주세요!');
                 return;
             }
