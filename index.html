@@ -1271,22 +1271,327 @@
 
     <script>
         const foodDB = [
+            // 밥/면류
             {name:"백미밥",cal:130,pro:2.5,carb:28,fat:0.3},
             {name:"현미밥",cal:112,pro:2.6,carb:23.5,fat:0.9},
-            {name:"고구마",cal:86,pro:1,carb:20,fat:0.1},
-            {name:"감자",cal:77,pro:2,carb:17,fat:0.1},
-            {name:"식빵",cal:265,pro:8,carb:49,fat:3.5},
+            {name:"잡곡밥",cal:115,pro:2.8,carb:24,fat:0.8},
+            {name:"김밥",cal:180,pro:4,carb:30,fat:5},
+            {name:"비빔밥",cal:490,pro:15,carb:75,fat:15},
+            {name:"볶음밥",cal:250,pro:8,carb:40,fat:7},
+            {name:"라면",cal:510,pro:10,carb:80,fat:16},
+            {name:"짜파게티",cal:540,pro:11,carb:82,fat:18},
+            {name:"우동",cal:220,pro:6,carb:45,fat:1},
+            {name:"짬뽕",cal:450,pro:20,carb:60,fat:15},
+            {name:"짜장면",cal:580,pro:15,carb:90,fat:18},
+            {name:"칼국수",cal:320,pro:12,carb:55,fat:5},
+            {name:"냉면",cal:370,pro:10,carb:70,fat:3},
+            {name:"파스타",cal:370,pro:13,carb:70,fat:4},
+            
+            // 고기/생선
             {name:"닭가슴살",cal:165,pro:31,carb:0,fat:3.6},
-            {name:"계란",cal:155,pro:13,carb:1.1,fat:11},
+            {name:"닭다리",cal:170,pro:25,carb:0,fat:8},
             {name:"소고기",cal:140,pro:22,carb:0,fat:5.5},
-            {name:"두부",cal:76,pro:8,carb:1.9,fat:4.8},
-            {name:"우유",cal:61,pro:3.2,carb:4.8,fat:3.3},
+            {name:"삼겹살",cal:518,pro:17,carb:0,fat:50},
+            {name:"돼지고기(앞다리)",cal:145,pro:21,carb:0,fat:6.5},
+            {name:"참치",cal:132,pro:28,carb:0,fat:1.3},
+            {name:"연어",cal:206,pro:22,carb:0,fat:13},
+            {name:"고등어",cal:205,pro:19,carb:0,fat:14},
+            {name:"계란",cal:155,pro:13,carb:1.1,fat:11},
+            {name:"계란흰자",cal:52,pro:11,carb:0.7,fat:0.2},
+            {name:"소시지",cal:301,pro:12,carb:3,fat:27},
+            {name:"베이컨",cal:541,pro:37,carb:1,fat:42},
+            
+            // 채소
             {name:"브로콜리",cal:34,pro:2.8,carb:7,fat:0.4},
             {name:"시금치",cal:23,pro:2.9,carb:3.6,fat:0.4},
+            {name:"상추",cal:15,pro:1.4,carb:2.9,fat:0.2},
+            {name:"양배추",cal:25,pro:1.3,carb:5.8,fat:0.1},
             {name:"토마토",cal:18,pro:0.9,carb:3.9,fat:0.2},
+            {name:"오이",cal:15,pro:0.7,carb:3.6,fat:0.1},
+            {name:"당근",cal:41,pro:0.9,carb:10,fat:0.2},
+            {name:"양파",cal:40,pro:1.1,carb:9.3,fat:0.1},
+            {name:"파프리카",cal:31,pro:1,carb:6,fat:0.3},
+            {name:"고추",cal:40,pro:1.9,carb:9.5,fat:0.4},
+            
+            // 과일
             {name:"바나나",cal:89,pro:1.1,carb:23,fat:0.3},
             {name:"사과",cal:52,pro:0.3,carb:14,fat:0.2},
+            {name:"딸기",cal:32,pro:0.7,carb:7.7,fat:0.3},
+            {name:"오렌지",cal:47,pro:0.9,carb:12,fat:0.1},
+            {name:"포도",cal:69,pro:0.7,carb:18,fat:0.2},
+            {name:"수박",cal:30,pro:0.6,carb:7.6,fat:0.2},
+            {name:"키위",cal:61,pro:1.1,carb:15,fat:0.5},
+            {name:"블루베리",cal:57,pro:0.7,carb:14,fat:0.3},
+            
+            // 유제품
+            {name:"우유",cal:61,pro:3.2,carb:4.8,fat:3.3},
+            {name:"저지방우유",cal:42,pro:3.4,carb:5,fat:1},
+            {name:"두유",cal:54,pro:3.3,carb:6,fat:1.8},
+            {name:"요거트",cal:59,pro:3.5,carb:4.7,fat:3.3},
+            {name:"그릭요거트",cal:59,pro:10,carb:3.6,fat:0.4},
+            {name:"치즈",cal:402,pro:25,carb:1.3,fat:33},
+            {name:"두부",cal:76,pro:8,carb:1.9,fat:4.8},
+            
+            // 빵/간식
+            {name:"식빵",cal:265,pro:8,carb:49,fat:3.5},
+            {name:"바게트",cal:270,pro:9,carb:55,fat:1.5},
+            {name:"크루아상",cal:406,pro:8,carb:46,fat:21},
+            {name:"베이글",cal:275,pro:11,carb:53,fat:2},
+            {name:"도넛",cal:452,pro:5,carb:51,fat:25},
+            {name:"케이크",cal:257,pro:4,carb:36,fat:12},
+            {name:"쿠키",cal:502,pro:5,carb:64,fat:25},
+            {name:"초콜릿",cal:546,pro:5,carb:59,fat:31},
+            
+            // 견과류
             {name:"아몬드",cal:579,pro:21,carb:22,fat:50},
+            {name:"호두",cal:654,pro:15,carb:14,fat:65},
+            {name:"땅콩",cal:567,pro:26,carb:16,fat:49},
+            {name:"캐슈넛",cal:553,pro:18,carb:30,fat:44},
+            
+            // 감자/고구마
+            {name:"고구마",cal:86,pro:1,carb:20,fat:0.1},
+            {name:"감자",cal:77,pro:2,carb:17,fat:0.1},
+            {name:"감자튀김",cal:312,pro:3.4,carb:41,fat:15},
+            
+            // 한식
+            {name:"김치찌개",cal:150,pro:10,carb:15,fat:5},
+            {name:"된장찌개",cal:120,pro:8,carb:12,fat:4},
+            {name:"순두부찌개",cal:180,pro:12,carb:10,fat:10},
+            {name:"불고기",cal:250,pro:25,carb:15,fat:10},
+            {name:"제육볶음",cal:280,pro:20,carb:18,fat:15},
+            {name:"닭갈비",cal:220,pro:25,carb:12,fat:8},
+            {name:"삼계탕",cal:350,pro:30,carb:20,fat:15},
+            {name:"갈비탕",cal:400,pro:25,carb:30,fat:20},
+            
+            // 양식
+            {name:"피자",cal:266,pro:11,carb:33,fat:10},
+            {name:"햄버거",cal:540,pro:25,carb:49,fat:27},
+            {name:"치킨",cal:246,pro:19,carb:10,fat:15},
+            {name:"스테이크",cal:271,pro:26,carb:0,fat:18},
+            {name:"샐러드",cal:50,pro:2,carb:8,fat:2},
+            {name:"시저샐러드",cal:180,pro:8,carb:12,fat:12},
+            
+            // 중식
+            {name:"탕수육",cal:320,pro:15,carb:40,fat:12},
+            {name:"깐풍기",cal:280,pro:20,carb:25,fat:12},
+            {name:"마파두부",cal:200,pro:12,carb:15,fat:10},
+            
+            // 일식
+            {name:"초밥",cal:150,pro:6,carb:25,fat:2},
+            {name:"돈까스",cal:464,pro:20,carb:40,fat:25},
+            {name:"라멘",cal:436,pro:15,carb:60,fat:14},
+            {name:"우동",cal:220,pro:6,carb:45,fat:1},
+            {name:"소바",cal:200,pro:5,carb:42,fat:1},
+            {name:"야끼소바",cal:350,pro:12,carb:55,fat:10},
+            {name:"규동",cal:650,pro:25,carb:90,fat:18},
+            {name:"오니기리",cal:180,pro:4,carb:40,fat:1},
+            {name:"타코야키",cal:28,pro:1.4,carb:3,fat:1.3},
+            {name:"오코노미야키",cal:260,pro:10,carb:35,fat:9},
+            
+            // 음료 (확장)
+            {name:"콜라",cal:42,pro:0,carb:11,fat:0},
+            {name:"사이다",cal:40,pro:0,carb:10,fat:0},
+            {name:"환타",cal:45,pro:0,carb:12,fat:0},
+            {name:"펩시",cal:42,pro:0,carb:11,fat:0},
+            {name:"오렌지주스",cal:45,pro:0.7,carb:10.4,fat:0.2},
+            {name:"사과주스",cal:46,pro:0.1,carb:11.3,fat:0.1},
+            {name:"포도주스",cal:60,pro:0.4,carb:15,fat:0.1},
+            {name:"토마토주스",cal:17,pro:0.8,carb:3.9,fat:0.1},
+            {name:"아메리카노",cal:5,pro:0.3,carb:1,fat:0},
+            {name:"카페라떼",cal:120,pro:6,carb:10,fat:6},
+            {name:"카푸치노",cal:80,pro:4,carb:6,fat:4},
+            {name:"카페모카",cal:290,pro:10,carb:40,fat:11},
+            {name:"바닐라라떼",cal:250,pro:8,carb:37,fat:8},
+            {name:"카라멜마끼아또",cal:240,pro:8,carb:34,fat:8},
+            {name:"프라푸치노",cal:240,pro:4,carb:50,fat:3},
+            {name:"녹차라떼",cal:230,pro:6,carb:38,fat:7},
+            {name:"밀크티",cal:220,pro:5,carb:40,fat:5},
+            {name:"핫초코",cal:192,pro:8,carb:27,fat:6},
+            {name:"스무디",cal:150,pro:2,carb:35,fat:1},
+            {name:"에너지드링크",cal:110,pro:0,carb:28,fat:0},
+            {name:"이온음료",cal:25,pro:0,carb:6,fat:0},
+            {name:"식혜",cal:81,pro:1.5,carb:18,fat:0.2},
+            {name:"수정과",cal:100,pro:0.5,carb:25,fat:0.1},
+            
+            // 분식 (확장)
+            {name:"순대",cal:147,pro:7,carb:18,fat:5},
+            {name:"튀김",cal:200,pro:4,carb:25,fat:10},
+            {name:"어묵",cal:90,pro:6,carb:10,fat:3},
+            {name:"만두",cal:250,pro:8,carb:35,fat:9},
+            {name:"군만두",cal:280,pro:10,carb:32,fat:12},
+            {name:"물만두",cal:220,pro:9,carb:30,fat:7},
+            {name:"왕만두",cal:300,pro:12,carb:38,fat:10},
+            {name:"떡꼬치",cal:120,pro:2,carb:26,fat:1},
+            {name:"순대국",cal:200,pro:12,carb:20,fat:8},
+            {name:"쫄면",cal:380,pro:8,carb:70,fat:6},
+            
+            // 한식 추가
+            {name:"육개장",cal:180,pro:15,carb:12,fat:8},
+            {name:"설렁탕",cal:300,pro:18,carb:15,fat:18},
+            {name:"곰탕",cal:320,pro:20,carb:10,fat:20},
+            {name:"해장국",cal:250,pro:18,carb:15,fat:12},
+            {name:"감자탕",cal:280,pro:20,carb:25,fat:10},
+            {name:"부대찌개",cal:350,pro:18,carb:30,fat:15},
+            {name:"청국장",cal:140,pro:10,carb:12,fat:6},
+            {name:"추어탕",cal:120,pro:10,carb:8,fat:5},
+            {name:"콩나물국",cal:30,pro:3,carb:4,fat:0.5},
+            {name:"미역국",cal:50,pro:3,carb:6,fat:2},
+            {name:"북어국",cal:80,pro:10,carb:5,fat:2},
+            {name:"떡국",cal:280,pro:8,carb:50,fat:5},
+            {name:"만둣국",cal:350,pro:12,carb:55,fat:8},
+            {name:"잔치국수",cal:380,pro:10,carb:70,fat:5},
+            {name:"김치",cal:15,pro:1,carb:2,fat:0.5},
+            {name:"깍두기",cal:20,pro:1,carb:3,fat:0.5},
+            {name:"총각김치",cal:18,pro:1,carb:2.5,fat:0.5},
+            {name:"나물",cal:35,pro:2,carb:5,fat:1},
+            {name:"잡채",cal:200,pro:5,carb:35,fat:5},
+            {name:"전",cal:180,pro:6,carb:20,fat:9},
+            {name:"김치전",cal:200,pro:5,carb:22,fat:10},
+            {name:"파전",cal:220,pro:6,carb:28,fat:10},
+            {name:"해물파전",cal:280,pro:12,carb:30,fat:12},
+            {name:"보쌈",cal:320,pro:25,carb:10,fat:20},
+            {name:"족발",cal:280,pro:20,carb:5,fat:20},
+            {name:"찜닭",cal:250,pro:28,carb:15,fat:10},
+            {name:"갈비찜",cal:380,pro:25,carb:20,fat:22},
+            {name:"LA갈비",cal:420,pro:22,carb:10,fat:32},
+            {name:"양념갈비",cal:450,pro:23,carb:25,fat:28},
+            {name:"돼지갈비",cal:400,pro:20,carb:15,fat:30},
+            {name:"닭볶음탕",cal:280,pro:25,carb:18,fat:12},
+            {name:"오징어볶음",cal:160,pro:15,carb:12,fat:6},
+            {name:"낙지볶음",cal:180,pro:16,carb:15,fat:6},
+            {name:"쭈꾸미볶음",cal:150,pro:14,carb:12,fat:5},
+            
+            // 치킨 종류
+            {name:"후라이드치킨",cal:246,pro:19,carb:10,fat:15},
+            {name:"양념치킨",cal:280,pro:18,carb:20,fat:15},
+            {name:"간장치킨",cal:260,pro:19,carb:15,fat:14},
+            {name:"파닭",cal:270,pro:20,carb:12,fat:16},
+            {name:"마늘치킨",cal:265,pro:19,carb:13,fat:15},
+            {name:"허니콤보",cal:290,pro:18,carb:22,fat:16},
+            {name:"순살치킨",cal:240,pro:20,carb:12,fat:14},
+            {name:"치킨너겟",cal:280,pro:15,carb:18,fat:16},
+            
+            // 피자 종류
+            {name:"페퍼로니피자",cal:298,pro:12,carb:36,fat:11},
+            {name:"불고기피자",cal:270,pro:13,carb:35,fat:9},
+            {name:"치즈피자",cal:272,pro:12,carb:33,fat:10},
+            {name:"콤비네이션피자",cal:280,pro:13,carb:34,fat:11},
+            {name:"포테이토피자",cal:265,pro:11,carb:38,fat:9},
+            {name:"슈퍼슈프림피자",cal:290,pro:14,carb:35,fat:12},
+            {name:"쉬림프피자",cal:260,pro:13,carb:32,fat:10},
+            {name:"고구마피자",cal:250,pro:10,carb:40,fat:7},
+            
+            // 햄버거 종류
+            {name:"빅맥",cal:563,pro:26,carb:46,fat:33},
+            {name:"상하이버거",cal:460,pro:20,carb:48,fat:22},
+            {name:"불고기버거",cal:400,pro:18,carb:44,fat:18},
+            {name:"치즈버거",cal:300,pro:15,carb:32,fat:12},
+            {name:"새우버거",cal:380,pro:14,carb:42,fat:18},
+            {name:"치킨버거",cal:420,pro:22,carb:40,fat:20},
+            {name:"더블버거",cal:680,pro:38,carb:48,fat:38},
+            {name:"베이컨버거",cal:520,pro:28,carb:42,fat:26},
+            {name:"와퍼",cal:677,pro:28,carb:52,fat:40},
+            
+            // 편의점 음식
+            {name:"삼각김밥(참치)",cal:180,pro:5,carb:35,fat:2},
+            {name:"삼각김밥(스팸)",cal:220,pro:6,carb:38,fat:5},
+            {name:"삼각김밥(치즈)",cal:200,pro:6,carb:36,fat:4},
+            {name:"삼각김밥(김치)",cal:190,pro:5,carb:37,fat:2},
+            {name:"삼각김밥(불고기)",cal:210,pro:7,carb:37,fat:4},
+            {name:"컵라면",cal:380,pro:8,carb:58,fat:13},
+            {name:"도시락(김치제육)",cal:680,pro:25,carb:95,fat:20},
+            {name:"도시락(불고기)",cal:650,pro:22,carb:90,fat:18},
+            {name:"도시락(치킨마요)",cal:720,pro:20,carb:100,fat:22},
+            {name:"샌드위치(햄치즈)",cal:320,pro:12,carb:42,fat:11},
+            {name:"샌드위치(야채)",cal:220,pro:8,carb:35,fat:6},
+            {name:"샌드위치(BLT)",cal:380,pro:15,carb:40,fat:16},
+            {name:"핫도그",cal:290,pro:10,carb:35,fat:12},
+            {name:"치즈핫도그",cal:340,pro:12,carb:38,fat:15},
+            {name:"떡볶이도시락",cal:450,pro:8,carb:80,fat:10},
+            {name:"유부초밥",cal:140,pro:4,carb:28,fat:2},
+            {name:"김밥(일반)",cal:180,pro:4,carb:30,fat:5},
+            {name:"누들박스",cal:520,pro:15,carb:75,fat:16},
+            {name:"치킨마요볼",cal:250,pro:12,carb:20,fat:13},
+            {name:"치즈볼",cal:230,pro:8,carb:22,fat:12},
+            {name:"감자튀김(편의점)",cal:320,pro:4,carb:42,fat:15},
+            {name:"고구마튀김",cal:280,pro:3,carb:48,fat:9},
+            {name:"포테이토칩",cal:536,pro:6,carb:53,fat:34},
+            {name:"새우깡",cal:465,pro:6,carb:70,fat:18},
+            {name:"포카칩",cal:530,pro:6,carb:58,fat:30},
+            {name:"프링글스",cal:536,pro:4,carb:56,fat:32},
+            {name:"꼬북칩",cal:520,pro:6,carb:62,fat:27},
+            {name:"오징어땅콩",cal:470,pro:18,carb:48,fat:22},
+            {name:"육포",cal:410,pro:33,carb:6,fat:28},
+            {name:"쥐포",cal:330,pro:68,carb:4,fat:4},
+            
+            // 디저트/아이스크림
+            {name:"아이스크림(바닐라)",cal:207,pro:3.5,carb:24,fat:11},
+            {name:"아이스크림(초코)",cal:216,pro:3.8,carb:28,fat:11},
+            {name:"아이스크림(딸기)",cal:192,pro:3.2,carb:27,fat:8},
+            {name:"소프트아이스크림",cal:140,pro:3,carb:22,fat:5},
+            {name:"빙수",cal:350,pro:5,carb:75,fat:3},
+            {name:"젤라또",cal:160,pro:4,carb:28,fat:4},
+            {name:"셔벗",cal:107,pro:1,carb:27,fat:0.1},
+            {name:"마카롱",cal:90,pro:2,carb:10,carb:5},
+            {name:"티라미수",cal:450,pro:6,carb:40,fat:30},
+            {name:"치즈케이크",cal:321,pro:6,carb:26,fat:23},
+            {name:"초코케이크",cal:352,pro:5,carb:50,fat:16},
+            {name:"카스테라",cal:320,pro:7,carb:55,fat:8},
+            {name:"마들렌",cal:110,pro:2,carb:12,fat:6},
+            {name:"휘낭시에",cal:95,pro:2,carb:10,fat:5},
+            {name:"스콘",cal:362,pro:6,carb:52,fat:15},
+            {name:"머핀",cal:377,pro:6,carb:56,fat:15},
+            {name:"브라우니",cal:466,pro:6,carb:63,fat:21},
+            {name:"쿠키(초코칩)",cal:488,pro:5,carb:66,fat:23},
+            {name:"와플",cal:291,pro:6,carb:33,fat:15},
+            {name:"팬케이크",cal:227,pro:6,carb:28,fat:10},
+            {name:"도넛(글레이즈드)",cal:269,pro:3,carb:31,fat:15},
+            {name:"크림빵",cal:289,pro:7,carb:45,fat:9},
+            {name:"단팥빵",cal:280,pro:6,carb:52,fat:5},
+            {name:"소보로빵",cal:349,pro:7,carb:54,fat:12},
+            {name:"야채빵",cal:220,pro:6,carb:38,fat:5},
+            
+            // 해산물
+            {name:"광어회",cal:103,pro:20,carb:0,fat:2},
+            {name:"우럭회",cal:90,pro:19,carb:0,fat:1},
+            {name:"연어회",cal:206,pro:22,carb:0,fat:13},
+            {name:"참치회",cal:132,pro:28,carb:0,fat:1.3},
+            {name:"문어",cal:82,pro:15,carb:2.2,fat:1},
+            {name:"주꾸미",cal:71,pro:13,carb:2.5,fat:0.9},
+            {name:"낙지",cal:70,pro:13,carb:2,fat:0.8},
+            {name:"오징어",cal:92,pro:16,carb:3,fat:1.4},
+            {name:"새우",cal:99,pro:21,carb:0.9,fat:1.7},
+            {name:"게",cal:97,pro:19,carb:0.5,fat:1.5},
+            {name:"전복",cal:73,pro:13,carb:3,fat:0.5},
+            {name:"홍합",cal:86,pro:12,carb:4,fat:2.2},
+            {name:"굴",cal:68,pro:7,carb:4,fat:2.5},
+            {name:"조개",cal:74,pro:13,carb:2,fat:1},
+            {name:"멍게",cal:60,pro:11,carb:2,fat:0.6},
+            {name:"해삼",cal:41,pro:8,carb:1,fat:0.2},
+            
+            // 가공식품
+            {name:"참치캔",cal:116,pro:26,carb:0,fat:1.3},
+            {name:"꽁치캔",cal:180,pro:18,carb:0,fat:12},
+            {name:"스팸",cal:310,pro:13,carb:2,fat:28},
+            {name:"비엔나소시지",cal:315,pro:11,carb:4,fat:29},
+            {name:"햄",cal:145,pro:15,carb:2,fat:9},
+            {name:"베이컨",cal:541,pro:37,carb:1,fat:42},
+            {name:"콘비프",cal:250,pro:25,carb:0,fat:17},
+            {name:"런천미트",cal:310,pro:12,carb:3,fat:28},
+            {name:"옥수수캔",cal:86,pro:3,carb:19,fat:1},
+            {name:"참치마요",cal:220,pro:18,carb:2,fat:16},
+            
+            // 기타 곡물
+            {name:"오트밀",cal:389,pro:17,carb:66,fat:7},
+            {name:"시리얼",cal:379,pro:7,carb:84,fat:2},
+            {name:"그래놀라",cal:471,pro:10,carb:65,fat:20},
+            {name:"뮤즐리",cal:352,pro:10,carb:66,fat:5},
+            {name:"콘플레이크",cal:357,pro:7,carb:84,fat:1},
+            {name:"누룽지",cal:380,pro:6,carb:82,fat:2},
+            {name:"팝콘",cal:387,pro:12,carb:78,fat:4},
+            {name:"퀴노아",cal:120,pro:4.4,carb:21,fat:2},
+            {name:"렌틸콩",cal:116,pro:9,carb:20,fat:0.4},
+            {name:"병아리콩",cal:164,pro:9,carb:27,fat:3},
         ];
 
         let currentMeal = '';
@@ -1557,15 +1862,25 @@
         function renderFoods(q='') {
             const all = [...foodDB,...customDB];
             const filtered = q ? all.filter(f=>f.name.includes(q)) : all;
-            document.getElementById('foodList').innerHTML = filtered.map((f,i)=>`
-                <div class="food-item" onclick="selectFood(${i})">
-                    ${f.photo ? `<img src="${f.photo}" class="food-item-photo">` : ''}
-                    <div class="food-item-content">
-                        <div class="food-name">${f.name}</div>
-                        <div class="food-info">${f.cal}kcal | P:${f.pro}g C:${f.carb}g F:${f.fat}g (100g)</div>
+            const favs = JSON.parse(localStorage.getItem('favorites')||'[]');
+            
+            document.getElementById('foodList').innerHTML = filtered.map((f,i)=>{
+                const isFav = favs.some(fav => fav.name === f.name);
+                return `
+                <div class="food-item" style="position: relative;">
+                    <div onclick="selectFood(${i})" style="flex: 1; display: flex; gap: 10px; cursor: pointer;">
+                        ${f.photo ? `<img src="${f.photo}" class="food-item-photo">` : ''}
+                        <div class="food-item-content">
+                            <div class="food-name">${f.name}</div>
+                            <div class="food-info">${f.cal}kcal | P:${f.pro}g C:${f.carb}g F:${f.fat}g (100g)</div>
+                        </div>
                     </div>
+                    <button onclick="event.stopPropagation(); toggleFavorite('${f.name}', ${f.cal}, ${f.pro}, ${f.carb}, ${f.fat})" 
+                            style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 10px;">
+                        ${isFav ? '⭐' : '☆'}
+                    </button>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function searchFood() {
@@ -2235,8 +2550,43 @@
         // === 즐겨찾기 기능 ===
         function openFavoritesModal() { document.getElementById('favoritesModal').style.display = 'block'; renderFavorites(); }
         function closeFavoritesModal() { document.getElementById('favoritesModal').style.display = 'none'; }
-        function toggleFavorite(foodName) { const idx = favorites.indexOf(foodName); if(idx > -1) favorites.splice(idx, 1); else favorites.push(foodName); localStorage.setItem('favorites', JSON.stringify(favorites)); }
-        function renderFavorites() { const all = [...foodDB, ...customDB]; const favFoods = all.filter(f => favorites.includes(f.name)); if(favFoods.length === 0) { document.getElementById('favoritesList').classList.add('hidden'); document.getElementById('noFavorites').classList.remove('hidden'); return; } document.getElementById('favoritesList').classList.remove('hidden'); document.getElementById('noFavorites').classList.add('hidden'); document.getElementById('favoritesList').innerHTML = favFoods.map(f=>`<div class="food-item" style="display: flex; justify-content: space-between;"><div style="flex: 1;"><div class="food-name">${f.name}</div><div class="food-info">${f.cal}kcal | P:${f.pro}g C:${f.carb}g F:${f.fat}g</div></div><button onclick="toggleFavorite('${f.name}'); renderFavorites();" style="background: none; border: none; font-size: 1.5rem;">⭐</button></div>`).join(''); }
+        
+        function toggleFavorite(name, cal, pro, carb, fat) {
+            let favs = JSON.parse(localStorage.getItem('favorites')||'[]');
+            const idx = favs.findIndex(f => f.name === name);
+            
+            if(idx > -1) {
+                favs.splice(idx, 1);
+            } else {
+                favs.push({name, cal, pro, carb, fat});
+            }
+            
+            localStorage.setItem('favorites', JSON.stringify(favs));
+            renderFoods(document.getElementById('foodSearch').value);
+        }
+        
+        function renderFavorites() { 
+            const favs = JSON.parse(localStorage.getItem('favorites')||'[]');
+            
+            if(favs.length === 0) { 
+                document.getElementById('favoritesList').classList.add('hidden'); 
+                document.getElementById('noFavorites').classList.remove('hidden'); 
+                return; 
+            } 
+            
+            document.getElementById('favoritesList').classList.remove('hidden'); 
+            document.getElementById('noFavorites').classList.add('hidden'); 
+            document.getElementById('favoritesList').innerHTML = favs.map(f=>`
+                <div class="food-item" style="display: flex; justify-content: space-between;">
+                    <div style="flex: 1;">
+                        <div class="food-name">${f.name}</div>
+                        <div class="food-info">${f.cal}kcal | P:${f.pro}g C:${f.carb}g F:${f.fat}g</div>
+                    </div>
+                    <button onclick="toggleFavorite('${f.name}', ${f.cal}, ${f.pro}, ${f.carb}, ${f.fat}); renderFavorites();" 
+                            style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">⭐</button>
+                </div>
+            `).join(''); 
+        }
 
         // === 백업/복원 기능 ===
         function openBackupModal() { document.getElementById('backupModal').style.display = 'block'; }
