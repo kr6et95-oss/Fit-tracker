@@ -1430,7 +1430,10 @@
             const bmr = s.gender==='male' ? (10*s.weight)+(6.25*s.height)-(5*s.age)+5 : (10*s.weight)+(6.25*s.height)-(5*s.age)-161;
             const tdee = bmr * s.activity;
             const cal = Math.round(tdee - 500);
-            const lm = s.weight * (1 - s.fat/100);
+            
+            // 체지방률 안전 처리
+            const safeFat = s.fat || 20; // 기본값 20%
+            const lm = s.weight * (1 - safeFat/100);
             const pro = Math.round(lm * 2.2);
             const fat = Math.round((cal * 0.27)/9);
             const carb = Math.round((cal - pro*4 - fat*9)/4);
