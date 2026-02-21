@@ -3816,7 +3816,7 @@
         ];
 
         // 운동 DB (MET 기반 칼로리 계산) - 기존 46종 + 추가 30종
-        const exercises = [
+        const exerciseDB = [
             // 기존 유산소 운동
             {category:"유산소",name:"걷기 느리게",met:3.0},
             {category:"유산소",name:"걷기 빠르게",met:4.3},
@@ -3963,6 +3963,25 @@
                 input.disabled = false;
                 input.style.background = '#FAFAFA';
             }
+        }
+
+        function loadTempData() {
+            const temp = JSON.parse(localStorage.getItem('tempTodayData')||'null');
+            if(!temp) return;
+            
+            const today = new Date().toDateString();
+            if(temp.date === today) {
+                mealData = temp.mealData || {breakfast:[],lunch:[],dinner:[],snack:[]};
+                photos = temp.photos || {breakfast:[],lunch:[],dinner:[],snack:[]};
+                dailyWater = temp.water || 0;
+                updateCounts();
+                updateTotals();
+                updatePhotos();
+            }
+        }
+
+        function clearTempData() {
+            localStorage.removeItem('tempTodayData');
         }
 
         function init() {
@@ -4929,78 +4948,35 @@
             localStorage.setItem('tempTodayData', JSON.stringify(tempData));
         }
 
-        function loadTempData() {
-            const temp = JSON.parse(localStorage.getItem('tempTodayData')||'null');
-            if(!temp) return;
-            
-            const today = new Date().toDateString();
-            if(temp.date === today) {
-                mealData = temp.mealData || {breakfast:[],lunch:[],dinner:[],snack:[]};
-                photos = temp.photos || {breakfast:[],lunch:[],dinner:[],snack:[]};
-                dailyWater = temp.water || 0;
-                updateCounts();
-                updateTotals();
-                updatePhotos();
-            }
-        }
-
-        function clearTempData() {
-            localStorage.removeItem('tempTodayData');
-        }
-
         // === 건강 앱 연동 (걸음 수) ===
         let todaySteps = 0;
         let stepsBurnedCalories = 0;
         let exercises = [];
 
         function getStepsFromHealth() {
-            // iOS Motion & Fitness API 사용
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            requestHealthData();
-                        } else {
-                            alert('Motion 권한이 필요합니다. 설정에서 허용해주세요.');
-                        }
-                    })
-                    .catch(err => {
-                        // iOS 12 이하는 권한 요청 없이 바로 시도
-                        requestHealthData();
-                    });
-            } else {
-                requestHealthData();
-            }
+            console.log('getStepsFromHealth 호출됨!');
+            // 바로 수동 입력 팝업
+            showManualStepsInput();
         }
 
         function requestHealthData() {
-            // Web Health API (실험적 기능)
-            if ('health' in navigator) {
-                navigator.health.queryStepCount({
-                    startTime: new Date().setHours(0,0,0,0),
-                    endTime: Date.now()
-                }).then(steps => {
-                    todaySteps = steps;
-                    updateStepsDisplay();
-                }).catch(err => {
-                    // 권한 없거나 지원 안 함
-                    showManualStepsInput();
-                });
-            } else {
-                // Web Health API 지원 안 함 - 수동 입력
-                showManualStepsInput();
-            }
+            // 사용 안 함
+            showManualStepsInput();
         }
 
         function showManualStepsInput() {
+            console.log('showManualStepsInput 호출됨!');
             const steps = prompt('오늘 걸음 수를 입력하세요:', '0');
-            if (steps !== null) {
+            console.log('입력된 걸음 수:', steps);
+            if (steps !== null && steps !== '') {
                 todaySteps = parseInt(steps) || 0;
+                console.log('설정된 걸음 수:', todaySteps);
                 updateStepsDisplay();
             }
         }
 
         function updateStepsDisplay() {
+            console.log('updateStepsDisplay 호출됨, 걸음 수:', todaySteps);
             document.getElementById('steps').value = todaySteps;
             stepsBurnedCalories = Math.round(todaySteps * 0.04); // 1보당 약 0.04kcal
             document.getElementById('stepsBurnedCal').textContent = stepsBurnedCalories;
