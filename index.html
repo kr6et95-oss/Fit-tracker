@@ -1239,7 +1239,17 @@
                 <h3>✏️ 기록 수정</h3>
                 <button class="close" onclick="closeEditRecordModal()">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                
+                <!-- 식사 기록 섹션 -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h4 style="margin: 0 0 15px 0; color: #667eea;">🍽️ 식사 기록</h4>
+                    <div id="editMealsList"></div>
+                    <button onclick="openEditMealModal()" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">
+                        ➕ 음식 추가
+                    </button>
+                </div>
+
                 <div class="input-group">
                     <label>체중 (kg)</label>
                     <input type="number" id="editWeight" step="0.1">
@@ -1264,6 +1274,35 @@
                 </div>
                 <button onclick="saveEditRecord()" class="btn btn-primary" style="width: 100%;">
                     저장
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 음식 추가 모달 (수정용) -->
+    <div id="editMealModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🍽️ 음식 추가</h3>
+                <button class="close" onclick="closeEditMealModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>식사 시간</label>
+                    <select id="editMealTime">
+                        <option value="breakfast">🌅 아침</option>
+                        <option value="lunch">🌞 점심</option>
+                        <option value="dinner">🌙 저녁</option>
+                        <option value="snack">🍪 간식</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>음식 검색</label>
+                    <input type="text" id="editFoodSearch" placeholder="음식 이름 검색" oninput="searchEditFood()">
+                </div>
+                <div id="editFoodResults" style="max-height: 300px; overflow-y: auto;"></div>
+                <button onclick="closeEditMealModal()" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">
+                    닫기
                 </button>
             </div>
         </div>
@@ -5087,12 +5126,85 @@
             document.getElementById('editExercise').checked = rec.exercise || false;
             document.getElementById('editMemo').value = rec.memo || '';
             
+            // 식사 데이터 로드
+            editingMealData = rec.meals || {breakfast:[],lunch:[],dinner:[],snack:[]};
+            renderEditMeals();
+            
             document.getElementById('editRecordModal').style.display = 'block';
+        }
+
+        let editingMealData = {breakfast:[],lunch:[],dinner:[],snack:[]};
+
+        function renderEditMeals() {
+            const meals = ['breakfast', 'lunch', 'dinner', 'snack'];
+            const mealNames = {breakfast:'🌅 아침', lunch:'🌞 점심', dinner:'🌙 저녁', snack:'🍪 간식'};
+            
+            let html = '';
+            meals.forEach(meal => {
+                if(editingMealData[meal] && editingMealData[meal].length > 0) {
+                    html += `<div style="margin-bottom: 15px;">
+                        <div style="font-weight: 700; color: #667eea; margin-bottom: 8px;">${mealNames[meal]}</div>`;
+                    editingMealData[meal].forEach((food, idx) => {
+                        html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 6px; margin-bottom: 5px;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">${food.name}</div>
+                                <div style="font-size: 0.85rem; color: #666;">${food.cal}kcal | P${food.pro}g C${food.carb}g F${food.fat}g</div>
+                            </div>
+                            <button onclick="removeEditFood('${meal}', ${idx})" style="background: #ff6b6b; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">삭제</button>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+            });
+            
+            if(!html) {
+                html = '<p style="text-align: center; color: #999; padding: 20px;">식사 기록이 없습니다</p>';
+            }
+            
+            document.getElementById('editMealsList').innerHTML = html;
+        }
+
+        function removeEditFood(meal, idx) {
+            if(!confirm('이 음식을 삭제하시겠습니까?')) return;
+            editingMealData[meal].splice(idx, 1);
+            renderEditMeals();
+        }
+
+        function openEditMealModal() {
+            document.getElementById('editMealModal').style.display = 'block';
+            searchEditFood();
+        }
+
+        function closeEditMealModal() {
+            document.getElementById('editMealModal').style.display = 'none';
+        }
+
+        function searchEditFood() {
+            const query = document.getElementById('editFoodSearch').value.toLowerCase();
+            const results = foodDB.filter(f => f.name.toLowerCase().includes(query));
+            
+            let html = '';
+            results.slice(0, 50).forEach(food => {
+                html += `<div onclick="addEditFood('${food.name}', ${food.cal}, ${food.pro}, ${food.carb}, ${food.fat})" class="food-item" style="cursor: pointer; padding: 10px; border-bottom: 1px solid #eee;">
+                    <div class="food-name">${food.name}</div>
+                    <div class="food-info">${food.cal}kcal | P${food.pro}g C${food.carb}g F${food.fat}g</div>
+                </div>`;
+            });
+            
+            document.getElementById('editFoodResults').innerHTML = html || '<p style="text-align: center; color: #999; padding: 20px;">검색 결과가 없습니다</p>';
+        }
+
+        function addEditFood(name, cal, pro, carb, fat) {
+            const meal = document.getElementById('editMealTime').value;
+            editingMealData[meal].push({name, cal, pro, carb, fat});
+            renderEditMeals();
+            closeEditMealModal();
         }
 
         function closeEditRecordModal() {
             document.getElementById('editRecordModal').style.display = 'none';
             editingIndex = null;
+            editingMealData = {breakfast:[],lunch:[],dinner:[],snack:[]};
         }
 
         function saveEditRecord() {
@@ -5101,11 +5213,37 @@
             const recs = JSON.parse(localStorage.getItem('records')||'[]');
             const rec = recs[editingIndex];
             
+            // 기존 데이터 업데이트
             rec.weight = +document.getElementById('editWeight').value;
             rec.bodyFat = document.getElementById('editBodyFat').value ? +document.getElementById('editBodyFat').value : null;
             rec.water = +document.getElementById('editWater').value;
             rec.exercise = document.getElementById('editExercise').checked;
             rec.memo = document.getElementById('editMemo').value;
+            
+            // 식사 데이터 업데이트 및 재계산
+            rec.meals = editingMealData;
+            
+            let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
+            ['breakfast','lunch','dinner','snack'].forEach(meal => {
+                if(editingMealData[meal]) {
+                    editingMealData[meal].forEach(food => {
+                        totalCal += food.cal;
+                        totalPro += food.pro;
+                        totalCarb += food.carb;
+                        totalFat += food.fat;
+                    });
+                }
+            });
+            
+            rec.cal = totalCal;
+            rec.pro = totalPro;
+            rec.carb = totalCarb;
+            rec.fat = totalFat;
+            
+            // 순칼로리 재계산
+            if(rec.totalBurnedCal) {
+                rec.netCal = rec.cal - rec.totalBurnedCal;
+            }
             
             localStorage.setItem('records', JSON.stringify(recs));
             closeEditRecordModal();
