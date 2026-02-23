@@ -5145,12 +5145,22 @@
                     html += `<div style="margin-bottom: 15px;">
                         <div style="font-weight: 700; color: #667eea; margin-bottom: 8px;">${mealNames[meal]}</div>`;
                     editingMealData[meal].forEach((food, idx) => {
-                        html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 6px; margin-bottom: 5px;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600;">${food.name}</div>
-                                <div style="font-size: 0.85rem; color: #666;">${food.cal}kcal | P${food.pro}g C${food.carb}g F${food.fat}g</div>
+                        const amount = food.amount || 1;
+                        html += `<div style="padding: 10px; background: white; border-radius: 6px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600;">${food.name}</div>
+                                    <div style="font-size: 0.85rem; color: #666;">${Math.round(food.cal * amount)}kcal | P${Math.round(food.pro * amount)}g C${Math.round(food.carb * amount)}g F${Math.round(food.fat * amount)}g</div>
+                                </div>
+                                <button onclick="removeEditFood('${meal}', ${idx})" style="background: #ff6b6b; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">삭제</button>
                             </div>
-                            <button onclick="removeEditFood('${meal}', ${idx})" style="background: #ff6b6b; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">삭제</button>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <label style="font-size: 0.9rem; color: #666;">수량:</label>
+                                <input type="number" value="${amount}" step="0.1" min="0.1" 
+                                    onchange="updateEditFoodAmount('${meal}', ${idx}, this.value)"
+                                    style="width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">
+                                <span style="font-size: 0.85rem; color: #999;">인분</span>
+                            </div>
                         </div>`;
                     });
                     html += '</div>';
@@ -5162,6 +5172,11 @@
             }
             
             document.getElementById('editMealsList').innerHTML = html;
+        }
+
+        function updateEditFoodAmount(meal, idx, amount) {
+            editingMealData[meal][idx].amount = parseFloat(amount) || 1;
+            renderEditMeals();
         }
 
         function removeEditFood(meal, idx) {
@@ -5196,7 +5211,7 @@
 
         function addEditFood(name, cal, pro, carb, fat) {
             const meal = document.getElementById('editMealTime').value;
-            editingMealData[meal].push({name, cal, pro, carb, fat});
+            editingMealData[meal].push({name, cal, pro, carb, fat, amount: 1});
             renderEditMeals();
             closeEditMealModal();
         }
@@ -5220,25 +5235,26 @@
             rec.exercise = document.getElementById('editExercise').checked;
             rec.memo = document.getElementById('editMemo').value;
             
-            // 식사 데이터 업데이트 및 재계산
+            // 식사 데이터 업데이트 및 재계산 (수량 반영)
             rec.meals = editingMealData;
             
             let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
             ['breakfast','lunch','dinner','snack'].forEach(meal => {
                 if(editingMealData[meal]) {
                     editingMealData[meal].forEach(food => {
-                        totalCal += food.cal;
-                        totalPro += food.pro;
-                        totalCarb += food.carb;
-                        totalFat += food.fat;
+                        const amount = food.amount || 1;
+                        totalCal += food.cal * amount;
+                        totalPro += food.pro * amount;
+                        totalCarb += food.carb * amount;
+                        totalFat += food.fat * amount;
                     });
                 }
             });
             
-            rec.cal = totalCal;
-            rec.pro = totalPro;
-            rec.carb = totalCarb;
-            rec.fat = totalFat;
+            rec.cal = Math.round(totalCal);
+            rec.pro = Math.round(totalPro);
+            rec.carb = Math.round(totalCarb);
+            rec.fat = Math.round(totalFat);
             
             // 순칼로리 재계산
             if(rec.totalBurnedCal) {
