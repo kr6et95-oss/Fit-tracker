@@ -912,14 +912,50 @@
                 <button class="btn btn-small btn-secondary" onclick="clearAll()">전체 삭제</button>
             </div>
             
-            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button class="btn btn-small" id="tabDaily" onclick="showTab('daily')" style="flex: 1; background: var(--accent); color: white;">일별 기록</button>
-                <button class="btn btn-small" id="tabWeekly" onclick="showTab('weekly')" style="flex: 1; background: #e0e0e0;">주간 통계</button>
-                <button class="btn btn-small" id="tabMonthly" onclick="showTab('monthly')" style="flex: 1; background: #e0e0e0;">월간 통계</button>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button class="btn btn-small" id="tabDaily" onclick="showTab('daily')" style="flex: 1; min-width: 100px; background: var(--accent); color: white;">일별 기록</button>
+                <button class="btn btn-small" id="tabCalendar" onclick="showTab('calendar')" style="flex: 1; min-width: 100px; background: #e0e0e0;">📅 캘린더</button>
+                <button class="btn btn-small" id="tabWeekly" onclick="showTab('weekly')" style="flex: 1; min-width: 100px; background: #e0e0e0;">주간 통계</button>
+                <button class="btn btn-small" id="tabMonthly" onclick="showTab('monthly')" style="flex: 1; min-width: 100px; background: #e0e0e0;">월간 통계</button>
             </div>
 
             <div id="dailyTab">
                 <div id="historyList"></div>
+            </div>
+
+            <div id="calendarTab" class="hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <button onclick="changeMonth(-1)" class="btn btn-small">◀ 이전</button>
+                    <h3 id="calendarMonth" style="margin: 0;">2024년 1월</h3>
+                    <button onclick="changeMonth(1)" class="btn btn-small">다음 ▶</button>
+                </div>
+                <div id="calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;"></div>
+                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <div style="font-weight: 700; margin-bottom: 10px;">범례</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: #4caf50; border-radius: 5px;"></div>
+                            <span>운동한 날 (이모지로 운동 종류 표시)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: #ff9800; border-radius: 5px;"></div>
+                            <span>기록만 있는 날</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 30px; height: 30px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 5px;"></div>
+                            <span>기록 없음</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                        <div style="font-weight: 700; margin-bottom: 8px;">운동 아이콘</div>
+                        <div style="font-size: 0.85rem; line-height: 1.8; color: #666;">
+                            🚶 걸음 | 🏃 달리기 | 🚴 자전거 | 🏊 수영 | 💪 웨이트<br>
+                            🥊 복싱 | 🧘 요가 | ⚽ 축구 | 🏀 농구 | 🎾 테니스<br>
+                            🏸 배드민턴 | 🪢 줄넘기 | ⛰️ 등산 | 🪜 계단
+                        </div>
+                    </div>
+                    <div id="streakInfo" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;"></div>
+                </div>
             </div>
 
             <div id="weeklyTab" class="hidden">
@@ -4593,18 +4629,247 @@
 
         function showTab(tab) {
             document.getElementById('dailyTab').classList.toggle('hidden', tab !== 'daily');
+            document.getElementById('calendarTab').classList.toggle('hidden', tab !== 'calendar');
             document.getElementById('weeklyTab').classList.toggle('hidden', tab !== 'weekly');
             document.getElementById('monthlyTab').classList.toggle('hidden', tab !== 'monthly');
             
             document.getElementById('tabDaily').style.background = tab === 'daily' ? 'var(--accent)' : '#e0e0e0';
             document.getElementById('tabDaily').style.color = tab === 'daily' ? 'white' : 'var(--primary)';
+            document.getElementById('tabCalendar').style.background = tab === 'calendar' ? 'var(--accent)' : '#e0e0e0';
+            document.getElementById('tabCalendar').style.color = tab === 'calendar' ? 'white' : 'var(--primary)';
             document.getElementById('tabWeekly').style.background = tab === 'weekly' ? 'var(--accent)' : '#e0e0e0';
             document.getElementById('tabWeekly').style.color = tab === 'weekly' ? 'white' : 'var(--primary)';
             document.getElementById('tabMonthly').style.background = tab === 'monthly' ? 'var(--accent)' : '#e0e0e0';
             document.getElementById('tabMonthly').style.color = tab === 'monthly' ? 'white' : 'var(--primary)';
 
+            if(tab === 'calendar') showCalendar();
             if(tab === 'weekly') showWeeklyStats();
             if(tab === 'monthly') showMonthlyStats();
+        }
+
+        let currentCalendarDate = new Date();
+
+        function changeMonth(delta) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + delta);
+            showCalendar();
+        }
+
+        function showCalendar() {
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            document.getElementById('calendarMonth').textContent = `${year}년 ${month + 1}월`;
+            
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            const recordMap = {};
+            recs.forEach(r => {
+                const date = new Date(r.date).toDateString();
+                recordMap[date] = r;
+            });
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            
+            let html = '';
+            
+            // 요일 헤더
+            ['일', '월', '화', '수', '목', '금', '토'].forEach((day, idx) => {
+                html += `<div style="font-weight: 700; text-align: center; padding: 10px; color: ${idx === 0 ? '#f44336' : idx === 6 ? '#2196f3' : '#333'};">${day}</div>`;
+            });
+            
+            // 빈 칸
+            for(let i = 0; i < startDay; i++) {
+                html += '<div></div>';
+            }
+            
+            // 날짜
+            for(let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = date.toDateString();
+                const rec = recordMap[dateStr];
+                const isToday = dateStr === new Date().toDateString();
+                
+                let bgColor = '#f5f5f5';
+                let borderColor = '#ddd';
+                let textColor = '#333';
+                let emojis = [];
+                let stepsText = '';
+                
+                if(rec) {
+                    const hasExercise = (rec.exercises && rec.exercises.length > 0) || rec.steps > 0;
+                    if(hasExercise) {
+                        bgColor = '#4caf50';
+                        textColor = 'white';
+                        
+                        // 걸음 수 표시
+                        if(rec.steps && rec.steps > 0) {
+                            emojis.push('🚶');
+                            stepsText = rec.steps >= 10000 ? `${Math.floor(rec.steps/1000)}k` : `${Math.floor(rec.steps/1000)}k`;
+                        }
+                        
+                        // 운동 종류별 이모지
+                        if(rec.exercises && rec.exercises.length > 0) {
+                            const exerciseTypes = new Set();
+                            rec.exercises.forEach(ex => {
+                                const name = ex.name.toLowerCase();
+                                if(name.includes('달리기') || name.includes('조깅')) exerciseTypes.add('🏃');
+                                else if(name.includes('자전거') || name.includes('사이클')) exerciseTypes.add('🚴');
+                                else if(name.includes('수영')) exerciseTypes.add('🏊');
+                                else if(name.includes('웨이트') || name.includes('근력')) exerciseTypes.add('💪');
+                                else if(name.includes('복싱') || name.includes('격투')) exerciseTypes.add('🥊');
+                                else if(name.includes('요가') || name.includes('필라테스')) exerciseTypes.add('🧘');
+                                else if(name.includes('축구')) exerciseTypes.add('⚽');
+                                else if(name.includes('농구')) exerciseTypes.add('🏀');
+                                else if(name.includes('테니스')) exerciseTypes.add('🎾');
+                                else if(name.includes('배드민턴')) exerciseTypes.add('🏸');
+                                else if(name.includes('줄넘기')) exerciseTypes.add('🪢');
+                                else if(name.includes('등산')) exerciseTypes.add('⛰️');
+                                else if(name.includes('계단')) exerciseTypes.add('🪜');
+                                else exerciseTypes.add('💪');
+                            });
+                            emojis.push(...Array.from(exerciseTypes));
+                        }
+                    } else {
+                        bgColor = '#ff9800';
+                        textColor = 'white';
+                        emojis.push('📝');
+                    }
+                }
+                
+                if(isToday) {
+                    borderColor = '#667eea';
+                }
+                
+                const emojiDisplay = emojis.slice(0, 2).join('');
+                
+                html += `<div onclick="showDayDetail('${dateStr}')" style="
+                    aspect-ratio: 1;
+                    background: ${bgColor};
+                    border: 2px solid ${borderColor};
+                    border-radius: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                    color: ${textColor};
+                    padding: 2px;
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <div style="font-size: ${isToday ? '1rem' : '0.85rem'}; font-weight: ${isToday ? '700' : '400'};">${day}</div>
+                    <div style="font-size: 0.7rem; line-height: 1;">${emojiDisplay}</div>
+                    ${stepsText ? `<div style="font-size: 0.65rem; opacity: 0.9;">${stepsText}</div>` : ''}
+                </div>`;
+            }
+            
+            document.getElementById('calendar').innerHTML = html;
+            
+            // 연속 운동일 계산
+            calculateStreak();
+        }
+
+        function calculateStreak() {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]').sort((a,b) => new Date(b.date) - new Date(a.date));
+            
+            let currentStreak = 0;
+            let maxStreak = 0;
+            let tempStreak = 0;
+            let lastDate = null;
+            
+            recs.forEach(rec => {
+                const hasExercise = (rec.exercises && rec.exercises.length > 0) || rec.steps > 0;
+                if(!hasExercise) return;
+                
+                const recDate = new Date(rec.date);
+                recDate.setHours(0, 0, 0, 0);
+                
+                if(!lastDate) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    
+                    if(recDate.getTime() === today.getTime() || recDate.getTime() === yesterday.getTime()) {
+                        currentStreak = 1;
+                        tempStreak = 1;
+                    }
+                } else {
+                    const diff = (lastDate - recDate) / (1000 * 60 * 60 * 24);
+                    if(diff === 1) {
+                        tempStreak++;
+                        if(currentStreak > 0) currentStreak++;
+                    } else {
+                        tempStreak = 1;
+                    }
+                }
+                
+                maxStreak = Math.max(maxStreak, tempStreak);
+                lastDate = recDate;
+            });
+            
+            const totalExerciseDays = recs.filter(r => (r.exercises && r.exercises.length > 0) || r.steps > 0).length;
+            
+            document.getElementById('streakInfo').innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #4caf50;">${currentStreak}</div>
+                        <div style="font-size: 0.85rem; color: #666;">현재 연속</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #ff9800;">${maxStreak}</div>
+                        <div style="font-size: 0.85rem; color: #666;">최대 연속</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #2196f3;">${totalExerciseDays}</div>
+                        <div style="font-size: 0.85rem; color: #666;">총 운동일</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showDayDetail(dateStr) {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            const rec = recs.find(r => new Date(r.date).toDateString() === dateStr);
+            
+            if(!rec) {
+                alert('해당 날짜에 기록이 없습니다.');
+                return;
+            }
+            
+            const date = new Date(dateStr);
+            const dateFormatted = date.toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
+            
+            let detail = `📅 ${dateFormatted}\n\n`;
+            detail += `체중: ${rec.weight}kg\n`;
+            if(rec.bodyFat) detail += `체지방: ${rec.bodyFat}%\n`;
+            detail += `섭취: ${rec.cal}kcal\n`;
+            if(rec.totalBurnedCal) {
+                detail += `소모: ${rec.totalBurnedCal}kcal\n`;
+                detail += `순칼로리: ${rec.netCal || (rec.cal - rec.totalBurnedCal)}kcal\n`;
+            }
+            detail += `\n💪 운동:\n`;
+            
+            if(rec.steps) {
+                detail += `🚶‍♂️ 걸음: ${rec.steps.toLocaleString()}보 (${rec.stepsBurnedCal}kcal)\n`;
+            }
+            
+            if(rec.exercises && rec.exercises.length > 0) {
+                rec.exercises.forEach(ex => {
+                    detail += `• ${ex.name} ${ex.minutes}분 (${ex.burned}kcal)\n`;
+                });
+            }
+            
+            if(!rec.steps && (!rec.exercises || rec.exercises.length === 0)) {
+                detail += '운동 기록 없음\n';
+            }
+            
+            if(rec.memo) {
+                detail += `\n📝 메모:\n${rec.memo}`;
+            }
+            
+            alert(detail);
         }
 
         function showWeeklyStats() {
