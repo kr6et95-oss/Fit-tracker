@@ -4861,6 +4861,9 @@
             // 기존 데이터 복구
             repairData();
             
+            // 임시 데이터 정리 (옛날 버전 데이터 제거)
+            cleanTempData();
+            
             const settings = JSON.parse(localStorage.getItem('settings')||'null');
             if(settings) {
                 document.getElementById('settingsCard').classList.add('hidden');
@@ -4887,6 +4890,19 @@
             
             // 알림 설정
             setupNotifications();
+        }
+
+        function cleanTempData() {
+            // 임시 데이터 완전 삭제 (새 구조로 다시 시작)
+            const cleaned = localStorage.getItem('tempDataCleaned');
+            if(cleaned === 'v2') return;
+            
+            localStorage.removeItem('tempMealData');
+            localStorage.removeItem('tempPhotos');
+            localStorage.removeItem('tempExercises');
+            localStorage.removeItem('tempSteps');
+            localStorage.setItem('tempDataCleaned', 'v2');
+            console.log('✅ 임시 데이터 정리 완료');
         }
 
         function repairData() {
@@ -5373,10 +5389,11 @@
         function updateTotals() {
             let cal=0,pro=0,carb=0,fat=0;
             Object.values(mealData).forEach(m=>m.forEach(f=>{
-                cal+=f.cal;
-                pro+=f.pro;
-                carb+=f.carb;
-                fat+=f.fat;
+                const amount = f.amount || 1;
+                cal += f.cal * amount;
+                pro += f.pro * amount;
+                carb += f.carb * amount;
+                fat += f.fat * amount;
             }));
             document.getElementById('totalCal').textContent = cal;
             document.getElementById('totalPro').textContent = Math.round(pro*10)/10+'g';
@@ -5412,21 +5429,8 @@
             const exerciseBurned = exercises.reduce((sum, ex) => sum + ex.burned, 0);
             const totalBurned = stepsBurnedCalories + exerciseBurned;
             
-            // meals를 amount 반영된 값으로 변환 (중복 계산 방지)
-            const savedMeals = {};
-            Object.keys(mealData).forEach(meal => {
-                savedMeals[meal] = mealData[meal].map(food => {
-                    const amount = food.amount || 1;
-                    return {
-                        name: food.name,
-                        cal: Math.round(food.cal * amount),
-                        pro: Math.round(food.pro * amount * 10) / 10,
-                        carb: Math.round(food.carb * amount * 10) / 10,
-                        fat: Math.round(food.fat * amount * 10) / 10,
-                        amount: 1 // 이미 계산했으므로 1로 저장
-                    };
-                });
-            });
+            // meals를 그대로 저장 (100g 기준 유지)
+            const savedMeals = JSON.parse(JSON.stringify(mealData));
             
             const rec = {
                 date: selectedRecordDate.toISOString(),
