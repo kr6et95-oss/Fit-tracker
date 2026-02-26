@@ -646,9 +646,32 @@
             </div>
         </div>
 
+        <!-- AI 피드백 -->
+        <div id="feedbackCard" class="card hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>🤖 AI 피드백</h2>
+                <button class="btn btn-small btn-secondary" onclick="generateFeedback()">🔄 새로고침</button>
+            </div>
+            <div id="feedbackContent" style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; line-height: 1.8;">
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">📊</div>
+                    <div>기록이 쌓이면 AI가 분석해드려요!</div>
+                    <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 10px;">최소 3일 이상의 기록이 필요합니다</div>
+                </div>
+            </div>
+        </div>
+
         <!-- 일일 기록 -->
         <div id="recordCard" class="card hidden">
-            <h2>📅 오늘 기록</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">📅 기록 입력</h2>
+                <button onclick="showDatePicker()" class="btn btn-small btn-secondary">날짜 선택</button>
+            </div>
+            
+            <div id="selectedDateDisplay" style="padding: 10px; background: #e3f2fd; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: 700; color: #1976d2;">
+                오늘 (2026년 2월 26일)
+            </div>
+            
             <div class="input-group">
                 <label>체중 (kg)</label>
                 <input type="number" id="todayWeight" step="0.1" placeholder="70.5">
@@ -787,6 +810,23 @@
                 </div>
                 <div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 8px; text-align: center; font-size: 0.9rem; color: #1565c0;">
                     💡 권장: 하루 2000ml (8잔)
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>😴 수면 시간</label>
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                    <input type="number" id="sleepHours" step="0.5" min="0" max="24" placeholder="7.5" style="flex: 1;">
+                    <span style="white-space: nowrap; font-weight: 700;">시간</span>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="setSleep(6)" class="btn-clear" style="flex: 1; min-width: 60px;">6시간</button>
+                    <button onclick="setSleep(7)" class="btn-clear" style="flex: 1; min-width: 60px;">7시간</button>
+                    <button onclick="setSleep(7.5)" class="btn-clear" style="flex: 1; min-width: 60px;">7.5시간</button>
+                    <button onclick="setSleep(8)" class="btn-clear" style="flex: 1; min-width: 60px;">8시간</button>
+                </div>
+                <div style="margin-top: 10px; padding: 10px; background: #f3e5f5; border-radius: 8px; text-align: center; font-size: 0.9rem; color: #6a1b9a;">
+                    💡 권장: 하루 7~9시간
                 </div>
             </div>
 
@@ -971,6 +1011,30 @@
     </div>
 
     <!-- 모달 -->
+    
+    <!-- 날짜 선택 모달 -->
+    <div id="datePickerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📅 날짜 선택</h3>
+                <button class="close" onclick="closeDatePicker()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>날짜</label>
+                    <input type="date" id="selectedDate" onchange="updateSelectedDateDisplay()">
+                </div>
+                <div style="padding: 10px; background: #fff3e0; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem;">
+                    💡 오늘 포함 과거 날짜를 선택할 수 있습니다
+                </div>
+                <button onclick="applySelectedDate()" class="btn btn-primary" style="width: 100%;">
+                    적용
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 식사 추가 모달 -->
     <div id="mealModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -3695,6 +3759,315 @@
             {name:"한천",cal:26,pro:0.5,carb:7,fat:0},
             {name:"과일젤리",cal:70,pro:0,carb:18,fat:0},
 
+            // 한식 추가 (50종)
+            {name:"육회",cal:120,pro:20,carb:2,fat:4},
+            {name:"천엽회",cal:45,pro:7,carb:2,fat:1.5},
+            {name:"간회",cal:85,pro:12,carb:3,fat:3},
+            {name:"염통구이",cal:150,pro:16,carb:2,fat:9},
+            {name:"곱창구이",cal:280,pro:16,carb:6,fat:21},
+            {name:"대창구이",cal:300,pro:17,carb:7,fat:23},
+            {name:"막창구이",cal:320,pro:18,carb:8,fat:24},
+            {name:"양구이",cal:120,pro:14,carb:4,fat:6},
+            {name:"닭발",cal:160,pro:18,carb:8,fat:6},
+            {name:"닭똥집",cal:94,pro:18,carb:0,fat:2},
+            {name:"닭목",cal:140,pro:16,carb:2,fat:8},
+            {name:"닭껍질",cal:450,pro:20,carb:0,fat:40},
+            {name:"돼지껍데기",cal:370,pro:28,carb:0,fat:29},
+            {name:"순대",cal:250,pro:11,carb:25,fat:12},
+            {name:"순대국밥",cal:500,pro:25,carb:50,fat:20},
+            {name:"내장탕",cal:450,pro:28,carb:30,fat:22},
+            {name:"뼈해장국",cal:420,pro:32,carb:28,fat:18},
+            {name:"콩나물국밥",cal:380,pro:18,carb:52,fat:10},
+            {name:"북어국",cal:180,pro:24,carb:12,fat:4},
+            {name:"황태국",cal:160,pro:22,carb:10,fat:3},
+            {name:"명란국",cal:140,pro:16,carb:8,fat:5},
+            {name:"시래기국",cal:120,pro:8,carb:18,fat:3},
+            {name:"우거지국",cal:130,pro:9,carb:19,fat:3.5},
+            {name:"들깨탕",cal:280,pro:12,carb:20,fat:18},
+            {name:"추어탕",cal:320,pro:22,carb:28,fat:14},
+            {name:"매운탕",cal:260,pro:28,carb:16,fat:10},
+            {name:"도가니탕",cal:420,pro:26,carb:18,fat:26},
+            {name:"꼬리곰탕",cal:520,pro:32,carb:20,fat:34},
+            {name:"사골국",cal:480,pro:28,carb:18,fat:32},
+            {name:"양지국밥",cal:560,pro:36,carb:42,fat:28},
+            {name:"소머리국밥",cal:600,pro:38,carb:45,fat:32},
+            {name:"선지해장국",cal:380,pro:26,carb:32,fat:16},
+            {name:"뼈다귀해장국",cal:480,pro:34,carb:36,fat:22},
+            {name:"아귀찜",cal:320,pro:42,carb:24,fat:8},
+            {name:"대구탕",cal:240,pro:32,carb:16,fat:6},
+            {name:"조기구이",cal:180,pro:24,carb:0,fat:9},
+            {name:"갈치구이",cal:220,pro:26,carb:0,fat:12},
+            {name:"임연수구이",cal:160,pro:22,carb:0,fat:8},
+            {name:"병어구이",cal:190,pro:24,carb:0,fat:10},
+            {name:"전어구이",cal:200,pro:25,carb:0,fat:11},
+            {name:"삼치구이",cal:240,pro:28,carb:0,fat:14},
+            {name:"방어구이",cal:260,pro:30,carb:0,fat:15},
+            {name:"장어구이",cal:280,pro:20,carb:4,fat:20},
+            {name:"붕장어구이",cal:240,pro:18,carb:3,fat:17},
+            {name:"먹물파스타",cal:420,pro:16,carb:68,fat:10},
+            {name:"알리오올리오",cal:380,pro:12,carb:64,fat:9},
+            {name:"봉골레파스타",cal:400,pro:18,carb:66,fat:8},
+
+            // 패스트푸드 추가 (50종)
+            {name:"맥도날드빅맥",cal:563,pro:26,carb:46,fat:33},
+            {name:"맥도날드상하이버거",cal:458,pro:17,carb:48,fat:22},
+            {name:"맥도날드불고기버거",cal:382,pro:15,carb:44,fat:16},
+            {name:"맥도날드치즈버거",cal:300,pro:15,carb:33,fat:12},
+            {name:"맥도날드햄버거",cal:250,pro:13,carb:31,fat:9},
+            {name:"맥도날드1955버거",cal:618,pro:30,carb:49,fat:34},
+            {name:"맥도날드슈슈버거",cal:520,pro:23,carb:52,fat:24},
+            {name:"맥도날드맥스파이시상하이버거",cal:505,pro:18,carb:50,fat:25},
+            {name:"맥도날드치킨맥너겟(4조각)",cal:170,pro:10,carb:10,fat:10},
+            {name:"맥도날드치킨맥너겟(6조각)",cal:255,pro:15,carb:15,fat:15},
+            {name:"맥도날드치킨맥너겟(10조각)",cal:425,pro:25,carb:25,fat:25},
+            {name:"맥도날드감자튀김(소)",cal:225,pro:3,carb:30,fat:11},
+            {name:"맥도날드감자튀김(중)",cal:340,pro:4,carb:44,fat:16},
+            {name:"맥도날드감자튀김(대)",cal:510,pro:6,carb:67,fat:24},
+            {name:"롯데리아불고기버거",cal:478,pro:20,carb:53,fat:20},
+            {name:"롯데리아한우불고기버거",cal:512,pro:23,carb:55,fat:22},
+            {name:"롯데리아새우버거",cal:389,pro:13,carb:48,fat:16},
+            {name:"롯데리아치즈스틱(4개)",cal:356,pro:12,carb:32,fat:20},
+            {name:"롯데리아양념치킨",cal:520,pro:28,carb:36,fat:28},
+            {name:"버거킹와퍼",cal:678,pro:28,carb:52,fat:40},
+            {name:"버거킹콰트로치즈와퍼",cal:888,pro:45,carb:54,fat:56},
+            {name:"버거킹통새우와퍼",cal:572,pro:21,carb:56,fat:29},
+            {name:"버거킹치킨킹",cal:638,pro:25,carb:53,fat:36},
+            {name:"버거킹너겟킹(8조각)",cal:377,pro:16,carb:28,fat:22},
+            {name:"버거킹어니언링",cal:410,pro:6,carb:53,fat:19},
+            {name:"KFC오리지널치킨(1조각)",cal:246,pro:19,carb:10,fat:15},
+            {name:"KFC핫크리스피(1조각)",cal:260,pro:19,carb:12,fat:16},
+            {name:"KFC징거버거",cal:520,pro:24,carb:48,fat:26},
+            {name:"KFC치즈볼(6개)",cal:290,pro:11,carb:28,fat:15},
+            {name:"맘스터치싸이버거",cal:680,pro:28,carb:58,fat:36},
+            {name:"맘스터치언빌리버블버거",cal:850,pro:42,carb:64,fat:48},
+            {name:"맘스터치화이트갈릭버거",cal:620,pro:26,carb:54,fat:32},
+            {name:"맘스터치딥치즈버거",cal:720,pro:32,carb:56,fat:38},
+            {name:"노브랜드버거",cal:450,pro:20,carb:42,fat:22},
+            {name:"쉐이크쉑버거",cal:540,pro:26,carb:40,fat:30},
+            {name:"쉐이크쉑슈룸버거",cal:580,pro:28,carb:44,fat:32},
+            {name:"인앤아웃버거",cal:480,pro:22,carb:39,fat:27},
+            {name:"화이트캐슬슬라이더",cal:140,pro:6,carb:14,fat:7},
+            {name:"파파이스치킨샌드위치",cal:700,pro:28,carb:50,fat:42},
+            {name:"칙필레치킨샌드위치",cal:440,pro:28,carb:40,fat:19},
+            {name:"웬디스데이브싱글",cal:570,pro:29,carb:41,fat:34},
+            {name:"타코벨크런치랩슈프림",cal:540,pro:16,carb:68,fat:21},
+            {name:"타코벨치즈고르디타크런치",cal:500,pro:19,carb:68,fat:21},
+            {name:"타코벨나초벨그란데",cal:740,pro:19,carb:77,fat:39},
+            {name:"치폴레부리토볼",cal:665,pro:32,carb:67,fat:29},
+            {name:"파네라브레드샌드위치",cal:520,pro:28,carb:52,fat:22},
+            {name:"서브웨이터키베이컨아보카도",cal:480,pro:30,carb:48,fat:20},
+            {name:"파이브가이즈버거",cal:700,pro:39,carb:39,fat:43},
+            {name:"핫도그",cal:290,pro:10,carb:24,fat:18},
+            {name:"콘도그",cal:330,pro:12,carb:38,fat:15},
+
+            // 디저트 추가 (50종)
+            {name:"티라미수",cal:450,pro:6,carb:52,fat:24},
+            {name:"푸딩",cal:150,pro:4,carb:24,fat:5},
+            {name:"크렘브륄레",cal:280,pro:5,carb:32,fat:15},
+            {name:"판나코타",cal:240,pro:4,carb:28,fat:13},
+            {name:"무스케이크",cal:320,pro:5,carb:38,fat:17},
+            {name:"슈크림",cal:245,pro:3,carb:26,fat:14},
+            {name:"에클레어",cal:262,pro:4,carb:28,fat:15},
+            {name:"마들렌",cal:120,pro:2,carb:14,fat:6},
+            {name:"휘낭시에",cal:110,pro:2,carb:13,fat:6},
+            {name:"카눌레",cal:140,pro:2,carb:18,fat:7},
+            {name:"다쿠아즈",cal:160,pro:4,carb:18,fat:9},
+            {name:"마카롱(1개)",cal:90,pro:2,carb:10,fat:5},
+            {name:"몽블랑",cal:380,pro:5,carb:48,fat:19},
+            {name:"밀크레이프",cal:420,pro:6,carb:52,fat:21},
+            {name:"오페라케이크",cal:460,pro:7,carb:54,fat:24},
+            {name:"프로피테롤",cal:280,pro:4,carb:32,fat:16},
+            {name:"카스테라",cal:320,pro:6,carb:58,fat:8},
+            {name:"롤케이크",cal:280,pro:5,carb:36,fat:13},
+            {name:"쇼트케이크",cal:340,pro:4,carb:42,fat:17},
+            {name:"가토쇼콜라",cal:420,pro:6,carb:48,fat:23},
+            {name:"브라우니",cal:380,pro:5,carb:48,fat:19},
+            {name:"쿠키(초코칩)",cal:220,pro:3,carb:30,fat:10},
+            {name:"스콘",cal:400,pro:7,carb:56,fat:17},
+            {name:"머핀(블루베리)",cal:380,pro:6,carb:56,fat:15},
+            {name:"치즈케이크",cal:420,pro:6,carb:32,fat:30},
+            {name:"뉴욕치즈케이크",cal:460,pro:7,carb:34,fat:33},
+            {name:"레어치즈케이크",cal:380,pro:6,carb:36,fat:24},
+            {name:"바스크치즈케이크",cal:440,pro:7,carb:38,fat:30},
+            {name:"수플레치즈케이크",cal:320,pro:5,carb:32,fat:19},
+            {name:"당근케이크",cal:400,pro:5,carb:52,fat:20},
+            {name:"레드벨벳케이크",cal:450,pro:5,carb:58,fat:22},
+            {name:"호두파이",cal:460,pro:6,carb:54,fat:25},
+            {name:"애플파이",cal:420,pro:4,carb:58,fat:19},
+            {name:"체리파이",cal:450,pro:4,carb:62,fat:20},
+            {name:"레몬타르트",cal:360,pro:4,carb:48,fat:17},
+            {name:"에그타르트",cal:310,pro:4,carb:32,fat:18},
+            {name:"초코타르트",cal:400,pro:5,carb:46,fat:22},
+            {name:"크레이프(초콜릿)",cal:340,pro:6,carb:44,fat:16},
+            {name:"크레이프(과일)",cal:280,pro:5,carb:42,fat:11},
+            {name:"벨기에와플",cal:291,pro:6,carb:33,fat:15},
+            {name:"리에주와플",cal:360,pro:7,carb:42,fat:18},
+            {name:"츄러스(1개)",cal:280,pro:4,carb:38,fat:13},
+            {name:"도넛(글레이즈드)",cal:230,pro:3,carb:28,fat:12},
+            {name:"도넛(초코)",cal:260,pro:3,carb:32,fat:14},
+            {name:"크롤러",cal:340,pro:5,carb:42,fat:17},
+            {name:"시나몬롤",cal:420,pro:7,carb:58,fat:18},
+            {name:"크림빵",cal:280,pro:6,carb:46,fat:8},
+            {name:"단팥빵",cal:260,pro:6,carb:48,fat:5},
+            {name:"소보로빵",cal:320,pro:7,carb:52,fat:10},
+            {name:"크림치즈브레드",cal:360,pro:8,carb:48,fat:15},
+
+            // 건강식 추가 (50종)
+            {name:"귀리",cal:389,pro:17,carb:66,fat:7},
+            {name:"퀴노아",cal:368,pro:14,carb:64,fat:6},
+            {name:"아마씨",cal:534,pro:18,carb:29,fat:42},
+            {name:"치아씨드",cal:486,pro:17,carb:42,fat:31},
+            {name:"햄프씨드",cal:553,pro:32,carb:9,fat:49},
+            {name:"호박씨",cal:559,pro:30,carb:11,fat:49},
+            {name:"해바라기씨",cal:584,pro:21,carb:20,fat:51},
+            {name:"케일칩",cal:180,pro:4,carb:22,fat:9},
+            {name:"브로콜리",cal:34,pro:2.8,carb:7,fat:0.4},
+            {name:"방울양배추",cal:43,pro:3.4,carb:9,fat:0.3},
+            {name:"아스파라거스",cal:20,pro:2.2,carb:3.9,fat:0.1},
+            {name:"비트",cal:43,pro:1.6,carb:10,fat:0.2},
+            {name:"셀러리",cal:16,pro:0.7,carb:3,fat:0.2},
+            {name:"오이",cal:15,pro:0.7,carb:3.6,fat:0.1},
+            {name:"파프리카",cal:31,pro:1,carb:6,fat:0.3},
+            {name:"주키니호박",cal:17,pro:1.2,carb:3.1,fat:0.3},
+            {name:"가지",cal:25,pro:1,carb:6,fat:0.2},
+            {name:"토마토",cal:18,pro:0.9,carb:3.9,fat:0.2},
+            {name:"방울토마토",cal:18,pro:0.9,carb:3.9,fat:0.2},
+            {name:"양파",cal:40,pro:1.1,carb:9.3,fat:0.1},
+            {name:"마늘",cal:149,pro:6.4,carb:33,fat:0.5},
+            {name:"생강",cal:80,pro:1.8,carb:18,fat:0.8},
+            {name:"고구마",cal:86,pro:1.6,carb:20,fat:0.1},
+            {name:"단호박",cal:26,pro:1,carb:6.5,fat:0.1},
+            {name:"연근",cal:74,pro:2.6,carb:17,fat:0.1},
+            {name:"우엉",cal:65,pro:1.5,carb:15,fat:0.1},
+            {name:"죽순",cal:27,pro:2.6,carb:5,fat:0.3},
+            {name:"표고버섯",cal:34,pro:2.2,carb:7,fat:0.5},
+            {name:"느타리버섯",cal:26,pro:2.1,carb:5,fat:0.3},
+            {name:"새송이버섯",cal:24,pro:2,carb:4.5,fat:0.3},
+            {name:"팽이버섯",cal:22,pro:1.9,carb:4,fat:0.2},
+            {name:"양송이버섯",cal:22,pro:3.1,carb:3.3,fat:0.3},
+            {name:"목이버섯",cal:25,pro:1.6,carb:6,fat:0.2},
+            {name:"석이버섯",cal:22,pro:1.5,carb:5.5,fat:0.1},
+            {name:"미역",cal:45,pro:1.6,carb:9,fat:0.6},
+            {name:"다시마",cal:43,pro:1.7,carb:9.6,fat:0.6},
+            {name:"김",cal:35,pro:6,carb:5,fat:0.3},
+            {name:"파래",cal:35,pro:5,carb:6,fat:0.5},
+            {name:"청각",cal:16,pro:1.1,carb:3.6,fat:0.1},
+            {name:"톳",cal:56,pro:2,carb:12,fat:0.6},
+            {name:"모시조개",cal:60,pro:10,carb:3,fat:1},
+            {name:"바지락",cal:60,pro:10,carb:3,fat:1},
+            {name:"홍합",cal:86,pro:12,carb:4,fat:2.2},
+            {name:"굴",cal:81,pro:9,carb:5,fat:2.3},
+            {name:"전복",cal:105,pro:17,carb:6,fat:0.8},
+            {name:"소라",cal:90,pro:16,carb:4,fat:1},
+            {name:"해삼",cal:41,pro:7.3,carb:4.5,fat:0.2},
+            {name:"멍게",cal:60,pro:11,carb:3,fat:0.8},
+            {name:"성게알",cal:120,pro:16,carb:5,fat:4.8},
+            {name:"명란젓",cal:142,pro:25,carb:3,fat:4},
+
+            // 주류/안주 추가 (50종)
+            {name:"소주(1잔50ml)",cal:60,pro:0,carb:0,fat:0},
+            {name:"맥주(500ml)",cal:215,pro:1.5,carb:18,fat:0},
+            {name:"하이트(500ml)",cal:200,pro:1.4,carb:16,fat:0},
+            {name:"카스(500ml)",cal:205,pro:1.5,carb:17,fat:0},
+            {name:"참이슬(1잔50ml)",cal:54,pro:0,carb:0,fat:0},
+            {name:"처음처럼(1잔50ml)",cal:55,pro:0,carb:0,fat:0},
+            {name:"청하(100ml)",cal:100,pro:0.3,carb:5,fat:0},
+            {name:"막걸리(100ml)",cal:54,pro:1.5,carb:8,fat:0},
+            {name:"동동주(100ml)",cal:55,pro:1.4,carb:8.5,fat:0},
+            {name:"와인레드(100ml)",cal:85,pro:0.1,carb:2.6,fat:0},
+            {name:"와인화이트(100ml)",cal:82,pro:0.1,carb:2.6,fat:0},
+            {name:"샴페인(100ml)",cal:89,pro:0.2,carb:1.5,fat:0},
+            {name:"위스키(30ml)",cal:70,pro:0,carb:0,fat:0},
+            {name:"브랜디(30ml)",cal:65,pro:0,carb:0,fat:0},
+            {name:"보드카(30ml)",cal:64,pro:0,carb:0,fat:0},
+            {name:"진(30ml)",cal:64,pro:0,carb:0,fat:0},
+            {name:"럼(30ml)",cal:65,pro:0,carb:0,fat:0},
+            {name:"데킬라(30ml)",cal:64,pro:0,carb:0,fat:0},
+            {name:"모히또",cal:160,pro:0,carb:20,fat:0},
+            {name:"마가리타",cal:168,pro:0,carb:7,fat:0.1},
+            {name:"피나콜라다",cal:245,pro:1,carb:32,fat:3},
+            {name:"쥐포",cal:330,pro:68,carb:4,fat:4},
+            {name:"마른오징어",cal:298,pro:55,carb:5,fat:4},
+            {name:"오징어채",cal:280,pro:52,carb:6,fat:3.5},
+            {name:"육포",cal:410,pro:55,carb:8,fat:18},
+            {name:"땅콩",cal:567,pro:26,carb:16,fat:49},
+            {name:"아몬드",cal:579,pro:21,carb:22,fat:50},
+            {name:"캐슈넛",cal:553,pro:18,carb:30,fat:44},
+            {name:"피스타치오",cal:560,pro:20,carb:28,fat:45},
+            {name:"마카다미아",cal:718,pro:8,carb:14,fat:76},
+            {name:"호두",cal:654,pro:15,carb:14,fat:65},
+            {name:"피칸",cal:691,pro:9,carb:14,fat:72},
+            {name:"건포도",cal:299,pro:3.1,carb:79,fat:0.5},
+            {name:"건망고",cal:319,pro:2.5,carb:78,fat:1.2},
+            {name:"건크랜베리",cal:308,pro:0,carb:82,fat:1.4},
+            {name:"건살구",cal:241,pro:3.4,carb:63,fat:0.5},
+            {name:"건자두",cal:240,pro:2.2,carb:64,fat:0.4},
+            {name:"건대추",cal:282,pro:3.9,carb:75,fat:0.5},
+            {name:"건바나나칩",cal:519,pro:2.3,carb:58,fat:34},
+            {name:"새우깡(대)",cal:465,pro:6,carb:70,fat:18},
+            {name:"감자칩(대)",cal:536,pro:6,carb:56,fat:32},
+            {name:"치즈볼",cal:520,pro:7,carb:62,fat:27},
+            {name:"양파링",cal:500,pro:6,carb:64,fat:24},
+            {name:"콘칩",cal:510,pro:6,carb:66,fat:24},
+            {name:"팝콘(무염)",cal:387,pro:13,carb:78,fat:4.5},
+            {name:"팝콘(카라멜)",cal:480,pro:10,carb:74,fat:18},
+            {name:"팝콘(치즈)",cal:490,pro:12,carb:70,fat:20},
+            {name:"버터구이오징어",cal:340,pro:48,carb:8,fat:13},
+            {name:"쥐치포",cal:315,pro:64,carb:5,fat:3.8},
+            {name:"진미채",cal:290,pro:54,carb:6,fat:3.5},
+
+            // 음료 추가 (50종)
+            {name:"아메리카노(톨)",cal:10,pro:1,carb:2,fat:0},
+            {name:"카페라떼(톨)",cal:150,pro:8,carb:14,fat:6},
+            {name:"카푸치노(톨)",cal:110,pro:6,carb:11,fat:4},
+            {name:"카페모카(톨)",cal:290,pro:10,carb:42,fat:11},
+            {name:"바닐라라떼(톨)",cal:250,pro:9,carb:37,fat:8},
+            {name:"카라멜마끼아또(톨)",cal:240,pro:9,carb:34,fat:8},
+            {name:"화이트초콜릿모카(톨)",cal:360,pro:11,carb:53,fat:13},
+            {name:"돌체라떼(톨)",cal:260,pro:9,carb:38,fat:9},
+            {name:"콜드브루",cal:5,pro:0.3,carb:1,fat:0},
+            {name:"플랫화이트",cal:130,pro:7,carb:12,fat:5},
+            {name:"그린티라떼(톨)",cal:330,pro:7,carb:54,fat:10},
+            {name:"얼그레이티라떼(톨)",cal:230,pro:7,carb:36,fat:7},
+            {name:"밀크티(톨)",cal:220,pro:6,carb:38,fat:5},
+            {name:"타로밀크티",cal:280,pro:5,carb:52,fat:7},
+            {name:"흑당밀크티",cal:350,pro:6,carb:64,fat:9},
+            {name:"버블티",cal:299,pro:5,carb:56,fat:7},
+            {name:"망고스무디",cal:250,pro:3,carb:58,fat:2},
+            {name:"딸기스무디",cal:230,pro:3,carb:54,fat:2},
+            {name:"블루베리스무디",cal:240,pro:3,carb:56,fat:2},
+            {name:"바나나스무디",cal:260,pro:4,carb:60,fat:2.5},
+            {name:"그린스무디",cal:180,pro:4,carb:38,fat:2},
+            {name:"프라푸치노(카라멜)",cal:420,pro:5,carb:66,fat:16},
+            {name:"프라푸치노(자바칩)",cal:470,pro:6,carb:69,fat:19},
+            {name:"프라푸치노(녹차)",cal:420,pro:5,carb:67,fat:16},
+            {name:"콜라(500ml)",cal:210,pro:0,carb:54,fat:0},
+            {name:"사이다(500ml)",cal:205,pro:0,carb:53,fat:0},
+            {name:"환타(500ml)",cal:235,pro:0,carb:61,fat:0},
+            {name:"스프라이트(500ml)",cal:200,pro:0,carb:52,fat:0},
+            {name:"밀키스(500ml)",cal:240,pro:2,carb:58,fat:1},
+            {name:"게토레이(500ml)",cal:125,pro:0,carb:31,fat:0},
+            {name:"포카리스웨트(500ml)",cal:135,pro:0,carb:33,fat:0},
+            {name:"레드불(250ml)",cal:110,pro:1,carb:27,fat:0},
+            {name:"핫식스(250ml)",cal:108,pro:0,carb:27,fat:0},
+            {name:"몬스터에너지(355ml)",cal:160,pro:0,carb:42,fat:0},
+            {name:"오렌지주스(200ml)",cal:90,pro:1,carb:21,fat:0.2},
+            {name:"사과주스(200ml)",cal:96,pro:0.2,carb:24,fat:0.2},
+            {name:"포도주스(200ml)",cal:120,pro:0.6,carb:30,fat:0.2},
+            {name:"토마토주스(200ml)",cal:34,pro:1.4,carb:8,fat:0.2},
+            {name:"당근주스(200ml)",cal:80,pro:1.6,carb:19,fat:0.3},
+            {name:"ABC주스(200ml)",cal:70,pro:1.2,carb:17,fat:0.2},
+            {name:"비트주스(200ml)",cal:80,pro:2,carb:18,fat:0.2},
+            {name:"케일주스(200ml)",cal:60,pro:3,carb:12,fat:0.5},
+            {name:"셀러리주스(200ml)",cal:32,pro:1.4,carb:6,fat:0.4},
+            {name:"석류주스(200ml)",cal:134,pro:0.3,carb:33,fat:0.3},
+            {name:"아사이주스(200ml)",cal:140,pro:2,carb:26,fat:5},
+            {name:"망고주스(200ml)",cal:120,pro:0.8,carb:30,fat:0.4},
+            {name:"파인애플주스(200ml)",cal:108,pro:0.8,carb:26,fat:0.2},
+            {name:"자몽주스(200ml)",cal:78,pro:1,carb:19,fat:0.2},
+            {name:"레몬에이드",cal:140,pro:0.2,carb:36,fat:0},
+            {name:"자몽에이드",cal:130,pro:0.3,carb:33,fat:0},
+
             // 세계 음식 추가 (100종)
             {name:"쿠바샌드위치",cal:520,pro:28,carb:48,fat:24},
             {name:"재미카저크치킨",cal:420,pro:32,carb:24,fat:24},
@@ -3983,6 +4356,122 @@
 
         let currentMeal = '';
         let mealData = {breakfast:[],lunch:[],dinner:[],snack:[]};
+        let selectedRecordDate = new Date(); // 현재 기록하려는 날짜
+        
+        function showDatePicker() {
+            const dateInput = document.getElementById('selectedDate');
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            
+            // 오늘 날짜로 초기화
+            dateInput.value = `${year}-${month}-${day}`;
+            dateInput.max = `${year}-${month}-${day}`; // 미래 날짜 선택 불가
+            
+            document.getElementById('datePickerModal').style.display = 'block';
+        }
+        
+        function closeDatePicker() {
+            document.getElementById('datePickerModal').style.display = 'none';
+        }
+        
+        function updateSelectedDateDisplay() {
+            const dateInput = document.getElementById('selectedDate');
+            if(dateInput.value) {
+                const date = new Date(dateInput.value + 'T00:00:00');
+                const formatted = date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'short'
+                });
+                return formatted;
+            }
+            return '';
+        }
+        
+        function applySelectedDate() {
+            const dateInput = document.getElementById('selectedDate');
+            if(!dateInput.value) {
+                alert('날짜를 선택해주세요');
+                return;
+            }
+            
+            selectedRecordDate = new Date(dateInput.value + 'T00:00:00');
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const isToday = selectedRecordDate.getTime() === today.getTime();
+            
+            const formatted = selectedRecordDate.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'short'
+            });
+            
+            document.getElementById('selectedDateDisplay').innerHTML = isToday 
+                ? `오늘 (${formatted})` 
+                : `${formatted}`;
+            
+            // 해당 날짜의 기존 기록 불러오기 (있으면)
+            loadRecordForDate(selectedRecordDate);
+            
+            closeDatePicker();
+        }
+        
+        function loadRecordForDate(date) {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            const dateStr = date.toDateString();
+            const existingRecord = recs.find(r => new Date(r.date).toDateString() === dateStr);
+            
+            if(existingRecord) {
+                // 기존 기록이 있으면 불러오기
+                if(confirm('이 날짜에 이미 기록이 있습니다. 불러올까요?')) {
+                    document.getElementById('todayWeight').value = existingRecord.weight || '';
+                    document.getElementById('todayBodyFat').value = existingRecord.bodyFat || '';
+                    dailyWater = existingRecord.water || 0;
+                    document.getElementById('waterAmount').textContent = dailyWater;
+                    
+                    if(existingRecord.meals) {
+                        mealData = existingRecord.meals;
+                        updateCounts();
+                        updateTotals();
+                    }
+                    
+                    if(existingRecord.steps) {
+                        todaySteps = existingRecord.steps;
+                        stepsBurnedCalories = existingRecord.stepsBurnedCal || 0;
+                        updateStepsDisplay();
+                    }
+                    
+                    if(existingRecord.exercises) {
+                        exercises = existingRecord.exercises;
+                        renderExercises();
+                        updateTotalBurned();
+                    }
+                }
+            } else {
+                // 새로운 날짜면 초기화
+                clearRecordInputs();
+            }
+        }
+        
+        function clearRecordInputs() {
+            document.getElementById('todayWeight').value = '';
+            document.getElementById('todayBodyFat').value = '';
+            dailyWater = 0;
+            document.getElementById('waterAmount').textContent = 0;
+            mealData = {breakfast:[],lunch:[],dinner:[],snack:[]};
+            todaySteps = 0;
+            stepsBurnedCalories = 0;
+            exercises = [];
+            updateCounts();
+            updateTotals();
+            updateStepsDisplay();
+            renderExercises();
+        }
         let photos = {breakfast:[],lunch:[],dinner:[],snack:[]};
         let customDB = JSON.parse(localStorage.getItem('customFoods')||'[]');
         let selected = null;
@@ -4064,9 +4553,11 @@
             if(settings) {
                 document.getElementById('settingsCard').classList.add('hidden');
                 document.getElementById('goalCard').classList.remove('hidden');
+                document.getElementById('feedbackCard').classList.remove('hidden');
                 document.getElementById('recordCard').classList.remove('hidden');
                 document.getElementById('historyCard').classList.remove('hidden');
                 showGoals(settings);
+                generateFeedback(); // AI 피드백 생성
             } else {
                 document.getElementById('settingsCard').classList.remove('hidden');
             }
@@ -4498,20 +4989,22 @@
 
             let cal=0,pro=0,carb=0,fat=0;
             Object.values(mealData).forEach(m=>m.forEach(f=>{
-                cal+=f.cal;
-                pro+=f.pro;
-                carb+=f.carb;
-                fat+=f.fat;
+                const amount = f.amount || 1;
+                cal+=f.cal * amount;
+                pro+=f.pro * amount;
+                carb+=f.carb * amount;
+                fat+=f.fat * amount;
             }));
 
             const exerciseBurned = exercises.reduce((sum, ex) => sum + ex.burned, 0);
             const totalBurned = stepsBurnedCalories + exerciseBurned;
             
             const rec = {
-                date: new Date().toISOString(),
+                date: selectedRecordDate.toISOString(),
                 weight: +w,
                 bodyFat: bf ? +bf : null,
                 water: dailyWater,
+                sleep: parseFloat(document.getElementById('sleepHours').value) || null,
                 steps: todaySteps,
                 stepsBurnedCal: stepsBurnedCalories,
                 exercises: JSON.parse(JSON.stringify(exercises)),
@@ -4519,13 +5012,33 @@
                 totalBurnedCal: totalBurned,
                 meals: JSON.parse(JSON.stringify(mealData)),
                 photos: JSON.parse(JSON.stringify(photos)),
-                cal, pro: Math.round(pro*10)/10, carb: Math.round(carb*10)/10, fat: Math.round(fat*10)/10,
-                netCal: cal - totalBurned,
+                cal: Math.round(cal), 
+                pro: Math.round(pro), 
+                carb: Math.round(carb), 
+                fat: Math.round(fat),
+                netCal: Math.round(cal - totalBurned),
                 memo: document.getElementById('memo').value
             };
 
             let recs = JSON.parse(localStorage.getItem('records')||'[]');
-            recs.unshift(rec);
+            
+            // 같은 날짜 기록 있으면 덮어쓰기
+            const dateStr = selectedRecordDate.toDateString();
+            const existingIndex = recs.findIndex(r => new Date(r.date).toDateString() === dateStr);
+            
+            if(existingIndex >= 0) {
+                if(confirm('이 날짜에 이미 기록이 있습니다. 덮어쓸까요?')) {
+                    recs[existingIndex] = rec;
+                } else {
+                    return;
+                }
+            } else {
+                recs.push(rec);
+            }
+            
+            // 날짜순 정렬 (최신순)
+            recs.sort((a,b) => new Date(b.date) - new Date(a.date));
+            
             localStorage.setItem('records',JSON.stringify(recs));
 
             document.getElementById('todayWeight').value = '';
@@ -4545,6 +5058,17 @@
             mealData = {breakfast:[],lunch:[],dinner:[],snack:[]};
             photos = {breakfast:[],lunch:[],dinner:[],snack:[]};
             
+            // 오늘 날짜로 리셋
+            selectedRecordDate = new Date();
+            const today = new Date();
+            const formatted = today.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'short'
+            });
+            document.getElementById('selectedDateDisplay').innerHTML = `오늘 (${formatted})`;
+            
             // 임시 데이터 삭제
             clearTempData();
             
@@ -4552,6 +5076,7 @@
             updateTotals();
             updatePhotos();
             loadHistory();
+            generateFeedback(); // AI 피드백 업데이트
             alert('기록 완료! 💪');
         }
 
@@ -4586,6 +5111,7 @@
                     <div>체중: <strong>${r.weight}kg</strong></div>
                     ${r.bodyFat ? `<div>체지방: <strong>${r.bodyFat}%</strong></div>` : ''}
                     ${r.water ? `<div>물: <strong>${r.water}ml</strong></div>` : ''}
+                    ${r.sleep ? `<div>수면: <strong>${r.sleep}시간</strong></div>` : ''}
                     <div>섭취: <strong>${r.cal}kcal</strong></div>
                     ${r.totalBurnedCal ? `<div style="color: #f57c00;">소모: <strong>${r.totalBurnedCal}kcal</strong></div>` : ''}
                     ${r.totalBurnedCal ? `<div style="color: #2e7d32; font-weight: 700;">순칼로리: <strong>${r.netCal || (r.cal - r.totalBurnedCal)}kcal</strong></div>` : ''}
@@ -5151,6 +5677,12 @@
             dailyWater = 0; 
             updateWaterDisplay(); 
         }
+        
+        // === 수면 시간 기능 ===
+        function setSleep(hours) {
+            document.getElementById('sleepHours').value = hours;
+        }
+        
         function updateWaterDisplay() {
             // 개인 맞춤 목표량 계산
             const settings = JSON.parse(localStorage.getItem('settings')||'{}');
@@ -5539,7 +6071,356 @@
             recs.splice(idx, 1);
             localStorage.setItem('records', JSON.stringify(recs));
             loadHistory();
+            generateFeedback(); // 피드백 업데이트
             alert('삭제 완료! 🗑️');
+        }
+
+        function generateFeedback() {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            const settings = JSON.parse(localStorage.getItem('settings')||'null');
+            
+            if(!settings || recs.length < 3) {
+                document.getElementById('feedbackContent').innerHTML = `
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">📊</div>
+                        <div>기록이 쌓이면 AI가 분석해드려요!</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 10px;">최소 3일 이상의 기록이 필요합니다 (현재: ${recs.length}일)</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 최근 7일 또는 전체 기록 분석
+            const recentRecs = recs.slice(0, Math.min(7, recs.length)).reverse();
+            
+            // === 1. TDEE 계산 (Harris-Benedict 공식) ===
+            const age = settings.age;
+            const height = settings.height;
+            const gender = settings.gender;
+            const currentWeight = recentRecs[recentRecs.length - 1].weight;
+            
+            let bmr;
+            if(gender === 'male') {
+                bmr = 88.362 + (13.397 * currentWeight) + (4.799 * height) - (5.677 * age);
+            } else {
+                bmr = 447.593 + (9.247 * currentWeight) + (3.098 * height) - (4.330 * age);
+            }
+            
+            // 활동량에 따른 TDEE (평균 운동일 기준)
+            const exerciseDays = recentRecs.filter(r => (r.exercises && r.exercises.length > 0) || r.steps > 5000).length;
+            const exerciseRate = exerciseDays / recentRecs.length;
+            let activityFactor = 1.2; // 거의 안함
+            if(exerciseRate >= 0.85) activityFactor = 1.725; // 매우 활동적
+            else if(exerciseRate >= 0.6) activityFactor = 1.55; // 활동적
+            else if(exerciseRate >= 0.4) activityFactor = 1.375; // 보통
+            
+            const tdee = Math.round(bmr * activityFactor);
+            
+            // === 2. 체중 변화 분석 ===
+            const firstWeight = recentRecs[0].weight;
+            const lastWeight = currentWeight;
+            const weightChange = lastWeight - firstWeight;
+            const weightChangePerWeek = (weightChange / recentRecs.length) * 7;
+            
+            // === 3. 체지방률 변화 (근손실 vs 지방감소) ===
+            const bodyFats = recentRecs.filter(r => r.bodyFat).map(r => r.bodyFat);
+            let bodyFatChange = 0;
+            let muscleAnalysis = '';
+            
+            if(bodyFats.length >= 2) {
+                const firstBodyFat = bodyFats[0];
+                const lastBodyFat = bodyFats[bodyFats.length - 1];
+                bodyFatChange = lastBodyFat - firstBodyFat;
+                
+                // 근육량 추정
+                const firstLeanMass = firstWeight * (1 - firstBodyFat / 100);
+                const lastLeanMass = lastWeight * (1 - lastBodyFat / 100);
+                const muscleLoss = firstLeanMass - lastLeanMass;
+                
+                if(weightChange < 0) {
+                    if(muscleLoss > 0.5) {
+                        muscleAnalysis = `⚠️ <strong>근손실 주의:</strong> 체중 감소 중 근육이 약 ${muscleLoss.toFixed(1)}kg 감소했어요. 단백질 섭취를 늘리고 근력 운동을 병행하세요!`;
+                    } else if(muscleLoss > 0) {
+                        muscleAnalysis = `⚡ <strong>양호:</strong> 약간의 근손실(${muscleLoss.toFixed(1)}kg)이 있지만 정상 범위예요. 단백질을 충분히 섭취하세요.`;
+                    } else {
+                        muscleAnalysis = `🎉 <strong>완벽:</strong> 근육량은 유지하면서 체지방만 감소 중이에요! 이상적입니다!`;
+                    }
+                }
+            }
+            
+            // === 4. 칼로리 분석 ===
+            const avgCal = Math.round(recentRecs.reduce((sum, r) => sum + r.cal, 0) / recentRecs.length);
+            const avgBurned = Math.round(recentRecs.reduce((sum, r) => sum + (r.totalBurnedCal || 0), 0) / recentRecs.length);
+            const avgNetCal = avgCal - avgBurned;
+            const calorieDeficit = tdee - avgNetCal;
+            
+            // === 5. 영양소 균형 분석 ===
+            const avgPro = Math.round(recentRecs.reduce((sum, r) => sum + r.pro, 0) / recentRecs.length);
+            const avgCarb = Math.round(recentRecs.reduce((sum, r) => sum + r.carb, 0) / recentRecs.length);
+            const avgFat = Math.round(recentRecs.reduce((sum, r) => sum + r.fat, 0) / recentRecs.length);
+            
+            const totalMacro = (avgPro * 4) + (avgCarb * 4) + (avgFat * 9);
+            const proRatio = Math.round((avgPro * 4 / totalMacro) * 100);
+            const carbRatio = Math.round((avgCarb * 4 / totalMacro) * 100);
+            const fatRatio = Math.round((avgFat * 9 / totalMacro) * 100);
+            
+            // 권장 비율: 단백질 25-35%, 탄수화물 45-65%, 지방 20-35%
+            const recommendedPro = currentWeight * 1.6; // 체중 1kg당 1.6g (다이어트 시)
+            
+            // === 6. 운동 분석 ===
+            const totalSteps = recentRecs.reduce((sum, r) => sum + (r.steps || 0), 0);
+            const avgSteps = Math.round(totalSteps / recentRecs.length);
+            
+            const exerciseTypes = {};
+            recentRecs.forEach(r => {
+                if(r.exercises) {
+                    r.exercises.forEach(ex => {
+                        const category = ex.name.includes('웨이트') || ex.name.includes('근력') ? '근력' :
+                                       ex.name.includes('달리기') || ex.name.includes('자전거') || ex.name.includes('수영') ? '유산소' :
+                                       ex.name.includes('요가') || ex.name.includes('필라테스') ? '유연성' : '기타';
+                        exerciseTypes[category] = (exerciseTypes[category] || 0) + 1;
+                    });
+                }
+            });
+            
+            // === 7. 수면 분석 ===
+            const sleepData = recentRecs.filter(r => r.sleep).map(r => r.sleep);
+            let avgSleep = 0;
+            let sleepAnalysis = '';
+            let sleepImpact = '';
+            
+            if(sleepData.length >= 2) {
+                avgSleep = sleepData.reduce((sum, s) => sum + s, 0) / sleepData.length;
+                const shortSleepDays = sleepData.filter(s => s < 6).length;
+                const goodSleepDays = sleepData.filter(s => s >= 7 && s <= 9).length;
+                
+                // 수면과 체중 변화 상관관계
+                if(avgSleep < 6) {
+                    sleepAnalysis = `⚠️ <strong>수면 부족 심각:</strong> 평균 ${avgSleep.toFixed(1)}시간으로 매우 부족해요!`;
+                    sleepImpact = `수면 부족은 식욕 호르몬(그렐린↑, 렙틴↓)을 교란시켜 식욕이 증가하고 신진대사가 느려집니다. 다이어트 효과가 50% 이상 감소할 수 있어요! <br><br>💡 <strong>TIP:</strong> 낮잠은 20~30분이 적당해요. 1시간 이상은 밤 수면을 방해할 수 있습니다.`;
+                } else if(avgSleep < 7) {
+                    sleepAnalysis = `⚠️ <strong>수면 부족:</strong> 평균 ${avgSleep.toFixed(1)}시간으로 약간 부족해요.`;
+                    sleepImpact = `7시간 미만 수면 시 근육 회복이 느리고 코르티솔(스트레스 호르몬)이 증가해 체지방이 쌓이기 쉬워요. <br><br>💡 <strong>TIP:</strong> 밤에 최소 6시간은 자야 효과적이에요. 부족하면 20~30분 파워 낮잠으로 보충하세요!`;
+                } else if(avgSleep >= 7 && avgSleep <= 9) {
+                    sleepAnalysis = `✅ <strong>이상적인 수면:</strong> 평균 ${avgSleep.toFixed(1)}시간, 완벽해요!`;
+                    sleepImpact = `충분한 수면은 성장호르몬 분비를 촉진해 근육 회복과 지방 분해를 돕습니다! <br><br>💡 <strong>TIP:</strong> 밤 수면이 충분하면 낮잠은 필요 없어요. 피곤하면 20분 파워 낮잠만 추천합니다.`;
+                } else {
+                    sleepAnalysis = `😴 <strong>과다 수면:</strong> 평균 ${avgSleep.toFixed(1)}시간으로 너무 많아요.`;
+                    sleepImpact = `9시간 이상 수면은 활동량 감소로 칼로리 소모가 줄어들 수 있어요. <br><br>💡 <strong>TIP:</strong> 낮잠을 줄이고 밤 수면을 7~8시간으로 조절하세요. 낮에는 활동적으로!`;
+                }
+                
+                // 수면 패턴 분석
+                if(shortSleepDays > sleepData.length * 0.5) {
+                    sleepImpact += ` ${sleepData.length}일 중 ${shortSleepDays}일이나 6시간 미만으로 잤어요!`;
+                }
+            }
+            
+            // === 8. 요일별 패턴 (7일 이상일 때) ===
+            let weekdayPattern = '';
+            if(recentRecs.length >= 7) {
+                const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+                const weekdayData = {};
+                recentRecs.forEach(r => {
+                    const day = new Date(r.date).getDay();
+                    if(!weekdayData[day]) weekdayData[day] = {cal: 0, exercise: 0, count: 0};
+                    weekdayData[day].cal += r.cal;
+                    weekdayData[day].exercise += ((r.exercises && r.exercises.length > 0) || r.steps > 5000) ? 1 : 0;
+                    weekdayData[day].count++;
+                });
+                
+                let maxCalDay = 0, minCalDay = 0;
+                let maxCal = 0, minCal = 999999;
+                Object.keys(weekdayData).forEach(day => {
+                    const avgDayCal = weekdayData[day].cal / weekdayData[day].count;
+                    if(avgDayCal > maxCal) { maxCal = avgDayCal; maxCalDay = day; }
+                    if(avgDayCal < minCal) { minCal = avgDayCal; minCalDay = day; }
+                });
+                
+                weekdayPattern = `${weekdays[maxCalDay]}요일에 가장 많이 먹고(${Math.round(maxCal)}kcal), ${weekdays[minCalDay]}요일에 가장 적게 먹어요(${Math.round(minCal)}kcal).`;
+            }
+            
+            // === 8. 요요 위험도 평가 ===
+            let yoyoRisk = '';
+            const weeklyLoss = Math.abs(weightChangePerWeek);
+            if(settings.goal === 'loss') {
+                if(weeklyLoss > 1) {
+                    yoyoRisk = `⚠️ <strong>요요 위험 높음:</strong> 너무 빠른 감량(주당 ${weeklyLoss.toFixed(1)}kg)은 요요 확률이 높아요. 주당 0.5~1kg 권장.`;
+                } else if(avgPro < recommendedPro * 0.8) {
+                    yoyoRisk = `⚠️ <strong>요요 위험 중간:</strong> 단백질 섭취 부족. 근육 손실로 기초대사량이 낮아질 수 있어요.`;
+                } else if(exerciseRate < 0.3) {
+                    yoyoRisk = `⚠️ <strong>요요 위험 중간:</strong> 운동 부족. 식단만으로는 요요가 올 수 있어요.`;
+                } else {
+                    yoyoRisk = `✅ <strong>요요 위험 낮음:</strong> 건강한 속도로 감량 중이고 운동도 병행하고 있어요!`;
+                }
+            }
+            
+            // === 피드백 생성 ===
+            let feedback = '';
+            
+            // 제목
+            let emoji = '';
+            if(weightChangePerWeek < -1) emoji = '⚠️';
+            else if(weightChangePerWeek < -0.5) emoji = '🎉';
+            else if(weightChangePerWeek < 0) emoji = '😊';
+            else if(Math.abs(weightChangePerWeek) < 0.3) emoji = '😐';
+            else emoji = '📈';
+            
+            feedback += `<div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; text-align: center;">${emoji} ${recentRecs.length}일간 상세 분석 리포트</div>`;
+            
+            // === 섹션 1: 체중 변화 ===
+            feedback += `<div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; margin-bottom: 15px;">`;
+            feedback += `<div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">📊 체중 변화</div>`;
+            feedback += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">`;
+            feedback += `<div>시작: ${firstWeight.toFixed(1)}kg</div>`;
+            feedback += `<div>현재: ${lastWeight.toFixed(1)}kg</div>`;
+            feedback += `<div>변화: ${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)}kg</div>`;
+            feedback += `<div>주간: ${weightChangePerWeek > 0 ? '+' : ''}${weightChangePerWeek.toFixed(2)}kg/주</div>`;
+            feedback += `</div>`;
+            
+            if(weightChangePerWeek < -1) {
+                feedback += `<div style="background: rgba(255,200,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">⚠️ 주당 1kg 이상 감량은 건강에 해로워요. 칼로리를 조금 늘리세요!</div>`;
+            } else if(weightChangePerWeek >= -1 && weightChangePerWeek < -0.5) {
+                feedback += `<div style="background: rgba(76,175,80,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">✅ 이상적인 감량 속도예요! 지금처럼 계속하세요!</div>`;
+            }
+            
+            if(muscleAnalysis) {
+                feedback += `<div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; margin-top: 10px;">${muscleAnalysis}</div>`;
+            }
+            feedback += `</div>`;
+            
+            // === 섹션 2: 칼로리 & 대사량 ===
+            feedback += `<div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; margin-bottom: 15px;">`;
+            feedback += `<div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">🔥 칼로리 & 대사량</div>`;
+            feedback += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.95rem;">`;
+            feedback += `<div>기초대사량(BMR):</div><div style="text-align: right;">${Math.round(bmr)}kcal</div>`;
+            feedback += `<div>총소비량(TDEE):</div><div style="text-align: right;">${tdee}kcal</div>`;
+            feedback += `<div>평균 섭취:</div><div style="text-align: right;">${avgCal}kcal</div>`;
+            feedback += `<div>평균 소모:</div><div style="text-align: right;">${avgBurned}kcal</div>`;
+            feedback += `<div>평균 순칼로리:</div><div style="text-align: right; font-weight: 700; color: ${avgNetCal < tdee ? '#4caf50' : '#ff6b6b'};">${avgNetCal}kcal</div>`;
+            feedback += `<div>칼로리 적자:</div><div style="text-align: right; font-weight: 700; color: ${calorieDeficit > 0 ? '#4caf50' : '#ff6b6b'};">${calorieDeficit > 0 ? '-' : '+'}${Math.abs(calorieDeficit)}kcal</div>`;
+            feedback += `</div>`;
+            
+            if(settings.goal === 'loss') {
+                if(calorieDeficit < 300) {
+                    feedback += `<div style="background: rgba(255,152,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">💡 칼로리 적자가 부족해요. 감량을 위해서는 하루 -500kcal 정도가 적당합니다!</div>`;
+                } else if(calorieDeficit > 800) {
+                    feedback += `<div style="background: rgba(255,200,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">⚠️ 칼로리 적자가 너무 커요. 근손실과 요요 위험이 있습니다. -500kcal 정도로 조절하세요!</div>`;
+                } else {
+                    feedback += `<div style="background: rgba(76,175,80,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">✅ 적절한 칼로리 적자예요!</div>`;
+                }
+            }
+            feedback += `</div>`;
+            
+            // === 섹션 3: 영양소 균형 ===
+            feedback += `<div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; margin-bottom: 15px;">`;
+            feedback += `<div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">🍽️ 영양소 균형</div>`;
+            feedback += `<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; text-align: center;">`;
+            feedback += `<div><div style="font-size: 0.85rem; opacity: 0.9;">단백질</div><div style="font-size: 1.3rem; font-weight: 700;">${proRatio}%</div><div style="font-size: 0.8rem;">${avgPro}g/일</div></div>`;
+            feedback += `<div><div style="font-size: 0.85rem; opacity: 0.9;">탄수화물</div><div style="font-size: 1.3rem; font-weight: 700;">${carbRatio}%</div><div style="font-size: 0.8rem;">${avgCarb}g/일</div></div>`;
+            feedback += `<div><div style="font-size: 0.85rem; opacity: 0.9;">지방</div><div style="font-size: 1.3rem; font-weight: 700;">${fatRatio}%</div><div style="font-size: 0.8rem;">${avgFat}g/일</div></div>`;
+            feedback += `</div>`;
+            
+            // 단백질 권장량
+            if(avgPro < recommendedPro * 0.8) {
+                feedback += `<div style="background: rgba(255,152,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">⚠️ 단백질 부족! 체중 ${currentWeight.toFixed(0)}kg 기준 최소 ${Math.round(recommendedPro * 0.8)}g 필요. 현재: ${avgPro}g</div>`;
+            } else if(avgPro >= recommendedPro) {
+                feedback += `<div style="background: rgba(76,175,80,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">✅ 단백질 섭취 충분! 근육 유지에 도움이 됩니다!</div>`;
+            }
+            
+            // 비율 평가
+            if(proRatio < 20) {
+                feedback += `<div style="background: rgba(255,152,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">💡 단백질 비율이 낮아요(권장: 25~35%). 닭가슴살, 계란, 두부 등을 더 드세요!</div>`;
+            }
+            feedback += `</div>`;
+            
+            // === 섹션 4: 운동 분석 ===
+            feedback += `<div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; margin-bottom: 15px;">`;
+            feedback += `<div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">💪 운동 분석</div>`;
+            feedback += `<div style="margin-bottom: 10px;">`;
+            feedback += `<div>운동 실천율: <strong>${Math.round(exerciseRate * 100)}%</strong> (${exerciseDays}/${recentRecs.length}일)</div>`;
+            feedback += `<div>평균 걸음 수: <strong>${avgSteps.toLocaleString()}</strong>보/일</div>`;
+            feedback += `</div>`;
+            
+            if(Object.keys(exerciseTypes).length > 0) {
+                feedback += `<div style="margin-top: 10px;"><strong>운동 종류:</strong> `;
+                feedback += Object.entries(exerciseTypes).map(([type, count]) => `${type}(${count}회)`).join(', ');
+                feedback += `</div>`;
+            }
+            
+            if(avgSteps < 5000) {
+                feedback += `<div style="background: rgba(255,152,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">💡 하루 평균 걸음 수가 부족해요. 최소 7,000보 이상 걸으세요!</div>`;
+            } else if(avgSteps >= 10000) {
+                feedback += `<div style="background: rgba(76,175,80,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">✅ 걸음 수 목표 달성! 만보 이상 걷고 있어요!</div>`;
+            }
+            
+            if(!exerciseTypes['근력'] && settings.goal === 'loss') {
+                feedback += `<div style="background: rgba(255,152,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">💡 근력 운동이 없어요! 유산소만 하면 근육이 빠집니다. 주 2~3회 웨이트 추가하세요!</div>`;
+            }
+            feedback += `</div>`;
+            
+            // === 섹션 5: 수면 분석 ===
+            if(sleepAnalysis) {
+                feedback += `<div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; margin-bottom: 15px;">`;
+                feedback += `<div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">😴 수면 분석</div>`;
+                feedback += `<div style="margin-bottom: 10px;">`;
+                feedback += `<div>평균 수면 시간: <strong>${avgSleep.toFixed(1)}시간</strong></div>`;
+                feedback += `<div>수면 기록: ${sleepData.length}/${recentRecs.length}일</div>`;
+                feedback += `</div>`;
+                feedback += `<div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px;">${sleepAnalysis}</div>`;
+                feedback += `<div style="font-size: 0.95rem; line-height: 1.6;">${sleepImpact}</div>`;
+                
+                // 수면과 체중 변화 상관관계
+                if(avgSleep < 7 && weightChangePerWeek >= 0) {
+                    feedback += `<div style="background: rgba(255,152,0,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">⚠️ <strong>주의:</strong> 수면 부족이 체중 감소를 방해하고 있을 수 있어요! 최소 7시간 이상 자세요!</div>`;
+                } else if(avgSleep >= 7 && weightChangePerWeek < -0.5 && weightChangePerWeek > -1) {
+                    feedback += `<div style="background: rgba(76,175,80,0.3); padding: 10px; border-radius: 8px; margin-top: 10px;">✅ 충분한 수면이 건강한 감량에 도움을 주고 있어요!</div>`;
+                }
+                feedback += `</div>`;
+            }
+            
+            // === 섹션 6: 패턴 & 위험도 ===
+            if(weekdayPattern || yoyoRisk) {
+                feedback += `<div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px; margin-bottom: 15px;">`;
+                feedback += `<div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">📈 패턴 & 위험도</div>`;
+                if(weekdayPattern) {
+                    feedback += `<div style="margin-bottom: 10px;">🗓️ ${weekdayPattern}</div>`;
+                }
+                if(yoyoRisk) {
+                    feedback += `<div style="background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">${yoyoRisk}</div>`;
+                }
+                feedback += `</div>`;
+            }
+            
+            // === 섹션 6: 맞춤 조언 ===
+            feedback += `<div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 10px;">`;
+            feedback += `<div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;">💊 맞춤 조언</div>`;
+            feedback += `<ol style="margin: 0; padding-left: 20px; line-height: 1.8;">`;
+            
+            if(avgPro < recommendedPro * 0.8) {
+                feedback += `<li>단백질을 하루 ${Math.round(recommendedPro)}g 이상 섭취하세요 (현재: ${avgPro}g)</li>`;
+            }
+            if(calorieDeficit < 300 && settings.goal === 'loss') {
+                feedback += `<li>칼로리를 하루 ${Math.round(avgCal - 200)}kcal로 줄이거나 운동을 늘리세요</li>`;
+            }
+            if(calorieDeficit > 800) {
+                feedback += `<li>칼로리를 하루 ${Math.round(avgCal + 200)}kcal로 늘려 근손실을 막으세요</li>`;
+            }
+            if(!exerciseTypes['근력']) {
+                feedback += `<li>주 2~3회 웨이트 트레이닝을 추가하세요</li>`;
+            }
+            if(avgSteps < 7000) {
+                feedback += `<li>하루 걸음 수를 ${7000 - avgSteps}보 더 늘리세요 (목표: 7,000보)</li>`;
+            }
+            if(avgSleep > 0 && avgSleep < 7) {
+                feedback += `<li>수면 시간을 ${(7 - avgSleep).toFixed(1)}시간 더 늘려 최소 7시간 이상 자세요</li>`;
+            }
+            if(weeklyLoss > 1) {
+                feedback += `<li>감량 속도를 주당 0.5~1kg으로 낮춰 요요를 예방하세요</li>`;
+            }
+            
+            feedback += `</ol></div>`;
+            
+            document.getElementById('feedbackContent').innerHTML = feedback;
         }
 
         function toggleDarkMode() { isDarkMode = !isDarkMode; localStorage.setItem('darkMode', isDarkMode); isDarkMode ? applyDarkMode() : removeDarkMode(); }
