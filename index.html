@@ -5216,10 +5216,10 @@
             mealData[currentMeal].push({
                 name:selected.name,
                 amount:r,
-                cal:Math.round(selected.cal*r),
-                pro:Math.round(selected.pro*r*10)/10,
-                carb:Math.round(selected.carb*r*10)/10,
-                fat:Math.round(selected.fat*r*10)/10
+                cal:selected.cal,
+                pro:selected.pro,
+                carb:selected.carb,
+                fat:selected.fat
             });
             addToRecent(selected.name);
             selected = null;
@@ -5254,7 +5254,16 @@
                 localStorage.setItem('customFoods',JSON.stringify(customDB));
             }
 
-            mealData[currentMeal].push({name,amount:amt/100,cal:Math.round(cal),pro:Math.round(pro*10)/10,carb:Math.round(carb*10)/10,fat:Math.round(fat*10)/10});
+            // 100g 기준으로 변환
+            const r = 100/amt;
+            mealData[currentMeal].push({
+                name,
+                amount:amt/100,
+                cal:Math.round(cal*r),
+                pro:Math.round(pro*r*10)/10,
+                carb:Math.round(carb*r*10)/10,
+                fat:Math.round(fat*r*10)/10
+            });
             
             document.getElementById('manualName').value = '';
             document.getElementById('manualAmount').value = '';
@@ -5313,7 +5322,7 @@
                     <div class="added-item">
                         <div>
                             <div style="font-weight:700;">${f.name} (${Math.round((f.amount || 1) * 100)}g)</div>
-                            <div style="font-size:0.85rem;opacity:0.8;">${Math.round(f.cal)}kcal | P:${Math.round(f.pro)}g C:${Math.round(f.carb)}g F:${Math.round(f.fat)}g</div>
+                            <div style="font-size:0.85rem;opacity:0.8;">${Math.round(f.cal * (f.amount || 1))}kcal | P:${Math.round(f.pro * (f.amount || 1))}g C:${Math.round(f.carb * (f.amount || 1))}g F:${Math.round(f.fat * (f.amount || 1))}g</div>
                         </div>
                         <button onclick="removeFood(${i})" style="background:#ff6b6b;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">삭제</button>
                     </div>
@@ -6949,10 +6958,10 @@
             mealData[currentMeal].push({
                 name: food.name,
                 amount: r,
-                cal: Math.round(food.cal*r),
-                pro: Math.round(food.pro*r*10)/10,
-                carb: Math.round(food.carb*r*10)/10,
-                fat: Math.round(food.fat*r*10)/10
+                cal: food.cal,
+                pro: food.pro,
+                carb: food.carb,
+                fat: food.fat
             });
             addToRecent(name);
             updateAdded();
