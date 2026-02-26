@@ -4890,10 +4890,17 @@
         }
 
         function repairData() {
-            const recs = JSON.parse(localStorage.getItem('records')||'[]');
-            if(recs.length === 0) return;
+            // 이미 수정했는지 확인
+            const repaired = localStorage.getItem('dataRepaired');
+            if(repaired === 'v1') return;  // 이미 수정함
             
-            let repaired = false;
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            if(recs.length === 0) {
+                localStorage.setItem('dataRepaired', 'v1');
+                return;
+            }
+            
+            let needsRepair = false;
             
             recs.forEach(rec => {
                 if(!rec.meals) return;
@@ -4919,14 +4926,14 @@
                             food.amount = ratio;
                             
                             recNeedsRepair = true;
-                            repaired = true;
+                            needsRepair = true;
                         }
                         
                         // 0 또는 음수 값 수정
                         if(!food.amount || food.amount <= 0) {
                             food.amount = 1;
                             recNeedsRepair = true;
-                            repaired = true;
+                            needsRepair = true;
                         }
                         
                         if(!food.cal || food.cal < 0) food.cal = 0;
@@ -4963,10 +4970,13 @@
                 }
             });
             
-            if(repaired) {
+            if(needsRepair) {
                 localStorage.setItem('records', JSON.stringify(recs));
+                localStorage.setItem('dataRepaired', 'v1');  // 수정 완료 표시
                 console.log('✅ 데이터 복구 완료!');
                 alert('✅ 기존 데이터가 복구되었습니다! 페이지를 새로고침하세요.');
+            } else {
+                localStorage.setItem('dataRepaired', 'v1');  // 수정 불필요
             }
         }
 
