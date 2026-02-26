@@ -4549,8 +4549,8 @@
         }
 
         function init() {
-            // 기존 데이터 마이그레이션 (amount 버그 수정)
-            fixAmountBug();
+            // 기존 데이터 복구
+            repairData();
             
             const settings = JSON.parse(localStorage.getItem('settings')||'null');
             if(settings) {
@@ -4580,63 +4580,84 @@
             setupNotifications();
         }
 
-        function fixAmountBug() {
+        function repairData() {
             const recs = JSON.parse(localStorage.getItem('records')||'[]');
-            let fixed = false;
+            if(recs.length === 0) return;
+            
+            let repaired = false;
             
             recs.forEach(rec => {
-                if(rec.meals) {
+                if(!rec.meals) return;
+                
+                let recNeedsRepair = false;
+                
+                ['breakfast','lunch','dinner','snack'].forEach(meal => {
+                    if(!rec.meals[meal]) return;
+                    
+                    rec.meals[meal].forEach(food => {
+                        // 비정상적인 amount 감지 (10 이상이면 잘못된 것)
+                        if(food.amount && food.amount >= 10) {
+                            // 100g 기준 영양소 역계산 (기존 foodDB와 비교)
+                            const ratio = food.amount / 100;
+                            
+                            // 100g 기준 값으로 되돌림
+                            food.cal = Math.round(food.cal / ratio);
+                            food.pro = Math.round((food.pro / ratio) * 10) / 10;
+                            food.carb = Math.round((food.carb / ratio) * 10) / 10;
+                            food.fat = Math.round((food.fat / ratio) * 10) / 10;
+                            
+                            // amount를 올바른 값으로
+                            food.amount = ratio;
+                            
+                            recNeedsRepair = true;
+                            repaired = true;
+                        }
+                        
+                        // 0 또는 음수 값 수정
+                        if(!food.amount || food.amount <= 0) {
+                            food.amount = 1;
+                            recNeedsRepair = true;
+                            repaired = true;
+                        }
+                        
+                        if(!food.cal || food.cal < 0) food.cal = 0;
+                        if(!food.pro || food.pro < 0) food.pro = 0;
+                        if(!food.carb || food.carb < 0) food.carb = 0;
+                        if(!food.fat || food.fat < 0) food.fat = 0;
+                    });
+                });
+                
+                // 레코드 전체 칼로리 재계산
+                if(recNeedsRepair) {
+                    let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
+                    
                     ['breakfast','lunch','dinner','snack'].forEach(meal => {
                         if(rec.meals[meal]) {
                             rec.meals[meal].forEach(food => {
-                                // amount가 10 이상이면 그램 단위로 잘못 저장된 것
-                                if(food.amount && food.amount >= 10) {
-                                    const ratio = food.amount / 100;
-                                    
-                                    // cal, pro, carb, fat도 원래 값으로 되돌림
-                                    food.cal = Math.round(food.cal / food.amount);
-                                    food.pro = Math.round((food.pro / food.amount) * 10) / 10;
-                                    food.carb = Math.round((food.carb / food.amount) * 10) / 10;
-                                    food.fat = Math.round((food.fat / food.amount) * 10) / 10;
-                                    
-                                    // amount 수정
-                                    food.amount = ratio;
-                                    fixed = true;
-                                }
+                                const amount = food.amount || 1;
+                                totalCal += (food.cal || 0) * amount;
+                                totalPro += (food.pro || 0) * amount;
+                                totalCarb += (food.carb || 0) * amount;
+                                totalFat += (food.fat || 0) * amount;
                             });
                         }
                     });
                     
-                    // 칼로리 재계산
-                    if(fixed) {
-                        let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
-                        ['breakfast','lunch','dinner','snack'].forEach(meal => {
-                            if(rec.meals[meal]) {
-                                rec.meals[meal].forEach(food => {
-                                    const amount = food.amount || 1;
-                                    totalCal += food.cal * amount;
-                                    totalPro += food.pro * amount;
-                                    totalCarb += food.carb * amount;
-                                    totalFat += food.fat * amount;
-                                });
-                            }
-                        });
-                        
-                        rec.cal = Math.round(totalCal);
-                        rec.pro = Math.round(totalPro);
-                        rec.carb = Math.round(totalCarb);
-                        rec.fat = Math.round(totalFat);
-                        
-                        if(rec.totalBurnedCal) {
-                            rec.netCal = rec.cal - rec.totalBurnedCal;
-                        }
+                    rec.cal = Math.round(totalCal);
+                    rec.pro = Math.round(totalPro);
+                    rec.carb = Math.round(totalCarb);
+                    rec.fat = Math.round(totalFat);
+                    
+                    if(rec.totalBurnedCal) {
+                        rec.netCal = rec.cal - rec.totalBurnedCal;
                     }
                 }
             });
             
-            if(fixed) {
+            if(repaired) {
                 localStorage.setItem('records', JSON.stringify(recs));
-                console.log('✅ Amount 버그 자동 수정 완료!');
+                console.log('✅ 데이터 복구 완료!');
+                alert('✅ 기존 데이터가 복구되었습니다! 페이지를 새로고침하세요.');
             }
         }
 
