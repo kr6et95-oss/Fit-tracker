@@ -4549,6 +4549,9 @@
         }
 
         function init() {
+            // 기존 데이터 마이그레이션 (amount 버그 수정)
+            fixAmountBug();
+            
             const settings = JSON.parse(localStorage.getItem('settings')||'null');
             if(settings) {
                 document.getElementById('settingsCard').classList.add('hidden');
@@ -4575,6 +4578,66 @@
             
             // 알림 설정
             setupNotifications();
+        }
+
+        function fixAmountBug() {
+            const recs = JSON.parse(localStorage.getItem('records')||'[]');
+            let fixed = false;
+            
+            recs.forEach(rec => {
+                if(rec.meals) {
+                    ['breakfast','lunch','dinner','snack'].forEach(meal => {
+                        if(rec.meals[meal]) {
+                            rec.meals[meal].forEach(food => {
+                                // amount가 10 이상이면 그램 단위로 잘못 저장된 것
+                                if(food.amount && food.amount >= 10) {
+                                    const ratio = food.amount / 100;
+                                    
+                                    // cal, pro, carb, fat도 원래 값으로 되돌림
+                                    food.cal = Math.round(food.cal / food.amount);
+                                    food.pro = Math.round((food.pro / food.amount) * 10) / 10;
+                                    food.carb = Math.round((food.carb / food.amount) * 10) / 10;
+                                    food.fat = Math.round((food.fat / food.amount) * 10) / 10;
+                                    
+                                    // amount 수정
+                                    food.amount = ratio;
+                                    fixed = true;
+                                }
+                            });
+                        }
+                    });
+                    
+                    // 칼로리 재계산
+                    if(fixed) {
+                        let totalCal = 0, totalPro = 0, totalCarb = 0, totalFat = 0;
+                        ['breakfast','lunch','dinner','snack'].forEach(meal => {
+                            if(rec.meals[meal]) {
+                                rec.meals[meal].forEach(food => {
+                                    const amount = food.amount || 1;
+                                    totalCal += food.cal * amount;
+                                    totalPro += food.pro * amount;
+                                    totalCarb += food.carb * amount;
+                                    totalFat += food.fat * amount;
+                                });
+                            }
+                        });
+                        
+                        rec.cal = Math.round(totalCal);
+                        rec.pro = Math.round(totalPro);
+                        rec.carb = Math.round(totalCarb);
+                        rec.fat = Math.round(totalFat);
+                        
+                        if(rec.totalBurnedCal) {
+                            rec.netCal = rec.cal - rec.totalBurnedCal;
+                        }
+                    }
+                }
+            });
+            
+            if(fixed) {
+                localStorage.setItem('records', JSON.stringify(recs));
+                console.log('✅ Amount 버그 자동 수정 완료!');
+            }
         }
 
         function saveSettings() {
