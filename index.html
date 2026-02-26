@@ -4812,7 +4812,7 @@
             const r = amt/100;
             mealData[currentMeal].push({
                 name:selected.name,
-                amount:amt,
+                amount:r,
                 cal:Math.round(selected.cal*r),
                 pro:Math.round(selected.pro*r*10)/10,
                 carb:Math.round(selected.carb*r*10)/10,
@@ -4851,7 +4851,7 @@
                 localStorage.setItem('customFoods',JSON.stringify(customDB));
             }
 
-            mealData[currentMeal].push({name,amount:amt,cal:Math.round(cal),pro:Math.round(pro*10)/10,carb:Math.round(carb*10)/10,fat:Math.round(fat*10)/10});
+            mealData[currentMeal].push({name,amount:amt/100,cal:Math.round(cal),pro:Math.round(pro*10)/10,carb:Math.round(carb*10)/10,fat:Math.round(fat*10)/10});
             
             document.getElementById('manualName').value = '';
             document.getElementById('manualAmount').value = '';
@@ -5265,7 +5265,7 @@
                 let stepsText = '';
                 
                 if(rec) {
-                    const hasExercise = (rec.exercises && rec.exercises.length > 0) || rec.steps > 0;
+                    const hasExercise = (rec.exercises && rec.exercises.length > 0);
                     if(hasExercise) {
                         bgColor = '#4caf50';
                         textColor = 'white';
@@ -5346,7 +5346,7 @@
             let lastDate = null;
             
             recs.forEach(rec => {
-                const hasExercise = (rec.exercises && rec.exercises.length > 0) || rec.steps > 0;
+                const hasExercise = (rec.exercises && rec.exercises.length > 0);
                 if(!hasExercise) return;
                 
                 const recDate = new Date(rec.date);
@@ -5376,7 +5376,7 @@
                 lastDate = recDate;
             });
             
-            const totalExerciseDays = recs.filter(r => (r.exercises && r.exercises.length > 0) || r.steps > 0).length;
+            const totalExerciseDays = recs.filter(r => (r.exercises && r.exercises.length > 0)).length;
             
             document.getElementById('streakInfo').innerHTML = `
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
@@ -6148,7 +6148,7 @@
             }
             
             // 활동량에 따른 TDEE (평균 운동일 기준)
-            const exerciseDays = recentRecs.filter(r => (r.exercises && r.exercises.length > 0) || r.steps > 5000).length;
+            const exerciseDays = recentRecs.filter(r => (r.exercises && r.exercises.length > 0)).length;
             const exerciseRate = exerciseDays / recentRecs.length;
             let activityFactor = 1.2; // 거의 안함
             if(exerciseRate >= 0.85) activityFactor = 1.725; // 매우 활동적
@@ -6265,7 +6265,7 @@
                     const day = new Date(r.date).getDay();
                     if(!weekdayData[day]) weekdayData[day] = {cal: 0, exercise: 0, count: 0};
                     weekdayData[day].cal += r.cal;
-                    weekdayData[day].exercise += ((r.exercises && r.exercises.length > 0) || r.steps > 5000) ? 1 : 0;
+                    weekdayData[day].exercise += ((r.exercises && r.exercises.length > 0)) ? 1 : 0;
                     weekdayData[day].count++;
                 });
                 
