@@ -4661,10 +4661,11 @@
 
             let cal=0, pro=0, carb=0, fat=0;
             Object.values(mealData).forEach(m=>m.forEach(f=>{
-                cal+=f.cal;
-                pro+=f.pro;
-                carb+=f.carb;
-                fat+=f.fat;
+                const amount = f.amount || 1;
+                cal += f.cal * amount;
+                pro += f.pro * amount;
+                carb += f.carb * amount;
+                fat += f.fat * amount;
             }));
 
             pro = Math.round(pro*10)/10;
@@ -4999,6 +5000,22 @@
             const exerciseBurned = exercises.reduce((sum, ex) => sum + ex.burned, 0);
             const totalBurned = stepsBurnedCalories + exerciseBurned;
             
+            // meals를 amount 반영된 값으로 변환 (중복 계산 방지)
+            const savedMeals = {};
+            Object.keys(mealData).forEach(meal => {
+                savedMeals[meal] = mealData[meal].map(food => {
+                    const amount = food.amount || 1;
+                    return {
+                        name: food.name,
+                        cal: Math.round(food.cal * amount),
+                        pro: Math.round(food.pro * amount * 10) / 10,
+                        carb: Math.round(food.carb * amount * 10) / 10,
+                        fat: Math.round(food.fat * amount * 10) / 10,
+                        amount: 1 // 이미 계산했으므로 1로 저장
+                    };
+                });
+            });
+            
             const rec = {
                 date: selectedRecordDate.toISOString(),
                 weight: +w,
@@ -5010,7 +5027,7 @@
                 exercises: JSON.parse(JSON.stringify(exercises)),
                 exerciseBurnedCal: exerciseBurned,
                 totalBurnedCal: totalBurned,
-                meals: JSON.parse(JSON.stringify(mealData)),
+                meals: savedMeals,
                 photos: JSON.parse(JSON.stringify(photos)),
                 cal: Math.round(cal), 
                 pro: Math.round(pro), 
@@ -5119,6 +5136,30 @@
                     <div>탄수화물: <strong>${r.carb}g</strong></div>
                     <div>지방: <strong>${r.fat||0}g</strong></div>
                 </div>`;
+                
+                // 식사 상세 내역
+                if(r.meals) {
+                    const mealLabels = {breakfast:'🌅 아침', lunch:'🌞 점심', dinner:'🌙 저녁', snack:'🍪 간식'};
+                    let hasMeals = false;
+                    let mealHtml = '<div style="margin-top: 10px; padding: 10px; background: #f3e5f5; border-radius: 8px;">';
+                    mealHtml += '<div style="font-weight: 700; color: #6a1b9a; margin-bottom: 8px;">🍽️ 식사 기록</div>';
+                    
+                    ['breakfast','lunch','dinner','snack'].forEach(meal => {
+                        if(r.meals[meal] && r.meals[meal].length > 0) {
+                            hasMeals = true;
+                            mealHtml += `<div style="margin-bottom: 8px;"><strong>${mealLabels[meal]}</strong></div>`;
+                            r.meals[meal].forEach(food => {
+                                const amount = food.amount || 1;
+                                const grams = Math.round(amount * 100);
+                                const cal = Math.round(food.cal * amount);
+                                mealHtml += `<div style="font-size: 0.9rem; margin-left: 10px; margin-bottom: 4px;">• ${food.name} ${grams}g (${cal}kcal)</div>`;
+                            });
+                        }
+                    });
+                    
+                    mealHtml += '</div>';
+                    if(hasMeals) html += mealHtml;
+                }
                 
                 // 운동 상세 내역
                 if(r.exercises && r.exercises.length > 0) {
@@ -5952,11 +5993,11 @@
                                 <button onclick="removeEditFood('${meal}', ${idx})" style="background: #ff6b6b; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">삭제</button>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <label style="font-size: 0.9rem; color: #666;">수량:</label>
-                                <input type="number" value="${amount}" step="0.1" min="0.1" 
-                                    onchange="updateEditFoodAmount('${meal}', ${idx}, this.value)"
+                                <label style="font-size: 0.9rem; color: #666;">양:</label>
+                                <input type="number" value="${Math.round(amount * 100)}" step="10" min="10" 
+                                    onchange="updateEditFoodAmount('${meal}', ${idx}, this.value / 100)"
                                     style="width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 5px;">
-                                <span style="font-size: 0.85rem; color: #999;">인분</span>
+                                <span style="font-size: 0.85rem; color: #999;">g</span>
                             </div>
                         </div>`;
                     });
