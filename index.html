@@ -602,6 +602,39 @@
                 </select>
             </div>
             <button class="btn btn-primary" onclick="alert('버튼 클릭됨!'); saveSettings();">설정 저장</button>
+            
+            <!-- 구글 시트 연동 (Apps Script) -->
+            <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #e0e0e0;">
+                <h3 style="margin-bottom: 15px;">☁️ 구글 시트 자동 백업</h3>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
+                    데이터를 구글 시트에 자동 백업하고 다른 기기와 동기화하세요!<br>
+                    <a href="#" onclick="showGoogleSheetsSetup(); return false;" style="color: #4285f4; text-decoration: underline;">📖 설정 가이드 보기</a>
+                </p>
+                
+                <div id="googleSheetsStatus" style="padding: 12px; background: #f5f5f5; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span id="syncStatusIcon">🔴</span>
+                        <span id="syncStatusText" style="font-weight: 600;">연동되지 않음</span>
+                    </div>
+                    <div id="syncLastUpdate" style="font-size: 0.85rem; color: #999; margin-top: 5px;"></div>
+                </div>
+                
+                <div id="appsScriptUrlSection">
+                    <div class="input-group" style="margin-bottom: 10px;">
+                        <label>Apps Script Web App URL</label>
+                        <input type="text" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/..." style="font-size: 0.85rem;">
+                    </div>
+                    <button class="btn" style="background: #4285f4; color: white; width: 100%; margin-bottom: 10px;" onclick="saveAppsScriptUrl()">
+                        💾 URL 저장 및 연동
+                    </button>
+                </div>
+                
+                <div id="googleSheetsControls" class="hidden" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="syncToSheets()">⬆️ 백업</button>
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="syncFromSheets()">⬇️ 복구</button>
+                    <button class="btn" style="flex: 1; background: #dc3545; color: white;" onclick="disconnectGoogleSheets()">🔌 연동 해제</button>
+                </div>
+            </div>
         </div>
 
         <!-- 목표 -->
@@ -7527,6 +7560,188 @@
                 document.body.appendChild(cheatMsg);
             }
         }
+
+        // ===== Google Apps Script 연동 =====
+        let appsScriptUrl = localStorage.getItem('appsScriptUrl');
+
+        // Apps Script URL 저장
+        function saveAppsScriptUrl() {
+            const url = document.getElementById('appsScriptUrl').value.trim();
+            
+            if (!url) {
+                alert('⚠️ Apps Script URL을 입력해주세요!');
+                return;
+            }
+            
+            if (!url.includes('script.google.com')) {
+                alert('⚠️ 올바른 Google Apps Script URL이 아닙니다!');
+                return;
+            }
+            
+            appsScriptUrl = url;
+            localStorage.setItem('appsScriptUrl', url);
+            
+            updateSyncStatus(true);
+            alert('✅ 구글 시트 연동 완료!\n이제 백업/복구 기능을 사용할 수 있습니다.');
+        }
+
+        // 설정 가이드 표시
+        function showGoogleSheetsSetup() {
+            const guide = `
+📖 구글 시트 연동 설정 가이드
+
+1️⃣ 새 구글 스프레드시트 만들기
+   - Google Sheets 접속
+   - 새 스프레드시트 생성
+   - 이름: "FIT TRACKER - 백업"
+
+2️⃣ Apps Script 열기
+   - 메뉴: 확장 프로그램 → Apps Script
+
+3️⃣ 코드 붙여넣기
+   - 기본 코드 삭제
+   - 아래 링크의 코드 복사해서 붙여넣기
+   - GitHub 저장소에서 'appsscript.gs' 파일 참고
+
+4️⃣ 배포하기
+   - 상단 "배포" → "새 배포"
+   - 유형: "웹 앱"
+   - 실행 계정: "나"
+   - 액세스 권한: "누구나"
+   - "배포" 클릭
+
+5️⃣ URL 복사
+   - 웹 앱 URL 복사
+   - 이 앱의 설정에 붙여넣기
+
+자세한 가이드는 GitHub 저장소를 참고하세요!
+            `;
+            alert(guide);
+        }
+
+        // 데이터 백업 (앱 → 구글 시트)
+        async function syncToSheets() {
+            if (!appsScriptUrl) {
+                alert('먼저 Apps Script URL을 설정해주세요!');
+                return;
+            }
+
+            try {
+                const recs = JSON.parse(localStorage.getItem('records') || '[]');
+                
+                if (recs.length === 0) {
+                    alert('백업할 기록이 없습니다!');
+                    return;
+                }
+
+                // 데이터 전송
+                const response = await fetch(appsScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'backup',
+                        data: recs
+                    })
+                });
+
+                localStorage.setItem('lastSyncTime', new Date().toISOString());
+                updateSyncStatus(true);
+                
+                alert(`✅ ${recs.length}개 기록 백업 완료!`);
+            } catch (error) {
+                console.error('백업 실패:', error);
+                alert('❌ 백업 실패: ' + error.message);
+            }
+        }
+
+        // 데이터 복구 (구글 시트 → 앱)
+        async function syncFromSheets() {
+            if (!appsScriptUrl) {
+                alert('먼저 Apps Script URL을 설정해주세요!');
+                return;
+            }
+
+            if (!confirm('⚠️ 현재 앱의 모든 데이터가 구글 시트 데이터로 교체됩니다. 계속하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(appsScriptUrl + '?action=restore');
+                const data = await response.json();
+
+                if (!data.records || data.records.length === 0) {
+                    alert('구글 시트에 데이터가 없습니다!');
+                    return;
+                }
+
+                localStorage.setItem('records', JSON.stringify(data.records));
+                localStorage.setItem('lastSyncTime', new Date().toISOString());
+                
+                alert(`✅ ${data.records.length}개 기록 복구 완료! 페이지를 새로고침하세요.`);
+                location.reload();
+            } catch (error) {
+                console.error('복구 실패:', error);
+                alert('❌ 복구 실패: ' + error.message);
+            }
+        }
+
+        // 연동 해제
+        function disconnectGoogleSheets() {
+            if (!confirm('구글 시트 연동을 해제하시겠습니까?')) return;
+            
+            localStorage.removeItem('appsScriptUrl');
+            localStorage.removeItem('lastSyncTime');
+            
+            appsScriptUrl = null;
+            document.getElementById('appsScriptUrl').value = '';
+            
+            updateSyncStatus(false);
+            alert('✅ 구글 시트 연동이 해제되었습니다.');
+        }
+
+        // 상태 UI 업데이트
+        function updateSyncStatus(connected) {
+            const statusIcon = document.getElementById('syncStatusIcon');
+            const statusText = document.getElementById('syncStatusText');
+            const lastUpdate = document.getElementById('syncLastUpdate');
+            const urlSection = document.getElementById('appsScriptUrlSection');
+            const controls = document.getElementById('googleSheetsControls');
+
+            if (connected) {
+                statusIcon.textContent = '🟢';
+                statusText.textContent = '연동됨';
+                urlSection.style.display = 'none';
+                controls.classList.remove('hidden');
+                controls.style.display = 'flex';
+                
+                const lastSync = localStorage.getItem('lastSyncTime');
+                if (lastSync) {
+                    const date = new Date(lastSync);
+                    lastUpdate.textContent = `마지막 동기화: ${date.toLocaleString('ko-KR')}`;
+                }
+            } else {
+                statusIcon.textContent = '🔴';
+                statusText.textContent = '연동되지 않음';
+                urlSection.style.display = 'block';
+                controls.classList.add('hidden');
+                lastUpdate.textContent = '';
+            }
+        }
+
+        // 페이지 로드 시 상태 체크
+        setTimeout(() => {
+            appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            if (appsScriptUrl) {
+                document.getElementById('appsScriptUrl').value = appsScriptUrl;
+                updateSyncStatus(true);
+            } else {
+                updateSyncStatus(false);
+            }
+        }, 500);
     </script>
 </body>
 </html>
