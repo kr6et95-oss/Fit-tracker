@@ -1,6 +1,7 @@
-const CACHE_NAME = 'fit-tracker-v69';
+const CACHE_NAME = 'fit-tracker-v70';
 const urlsToCache = [
-  './체중관리앱.html',
+  './index.html',
+  './foods.json',
   'https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nanum+Gothic:wght@400;700;800&display=swap',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
 ];
