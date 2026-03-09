@@ -13,6 +13,7 @@
     <title>FIT TRACKER - 체중 관리</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="foods.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -1442,21 +1443,18 @@
     </div>
 
     <script>
-        // 음식 DB - 외부 파일에서 로드
-        let foodDB = [];
+        // 음식 DB - foods.js에서 로드
+        let foodDB = typeof FOOD_DATA !== 'undefined' ? FOOD_DATA : [];
         
-        // foods.json 로드
-        fetch('foods.json')
-            .then(response => response.text())
-            .then(text => {
-                // JavaScript 배열 형식을 eval로 파싱 (안전한 환경)
-                foodDB = eval(text);
+        // 로드 확인
+        setTimeout(() => {
+            if (foodDB.length === 0) {
+                console.error('⚠️ 음식 DB 로드 실패!');
+                alert('음식 데이터 로딩에 실패했습니다. 페이지를 새로고침해주세요!');
+            } else {
                 console.log(`✅ 음식 DB 로드 완료: ${foodDB.length}개`);
-            })
-            .catch(error => {
-                console.error('음식 DB 로드 실패:', error);
-                alert('⚠️ 음식 데이터 로딩에 실패했습니다. 페이지를 새로고침해주세요!');
-            });
+            }
+        }, 1000);
         
         let customDB = JSON.parse(localStorage.getItem('customFoods')||'[]');
             // 기존 유산소 운동
