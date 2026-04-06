@@ -548,6 +548,11 @@
             <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
                 <button onclick="toggleDarkMode()" class="header-btn" id="darkModeBtn">🌙 다크모드</button>
                 <button onclick="openWaterModal()" class="header-btn">💧 물</button>
+                <button onclick="openWeeklyReportModal()" class="header-btn">📊 리포트</button>
+                <button onclick="openAICoachModal()" class="header-btn">🧠 AI코칭</button>
+                <button onclick="openMealRecommendModal()" class="header-btn">🍽️ 식단</button>
+                <button onclick="openWorkoutRoutineModal()" class="header-btn">🏋️ 운동</button>
+                <button onclick="openMuscleMapModal()" class="header-btn">💪 근육</button>
                 <button onclick="openFavoritesModal()" class="header-btn">⭐ 즐겨찾기</button>
                 <button onclick="openRecentModal()" class="header-btn">🕐 최근</button>
                 <button onclick="openTemplateModal()" class="header-btn">📋 템플릿</button>
@@ -586,6 +591,10 @@
             <div class="input-group">
                 <label>목표 체중 (kg)</label>
                 <input type="number" id="targetWeight" step="0.1" placeholder="65">
+            </div>
+            <div class="input-group">
+                <label>🎯 목표 달성 날짜</label>
+                <input type="date" id="targetDate" placeholder="2025-06-30">
             </div>
             <div class="input-group">
                 <label>목표 체지방률 (%) - 선택</label>
@@ -643,6 +652,29 @@
                 <h2>📊 나의 목표</h2>
                 <button class="btn btn-small btn-secondary" onclick="showSettings()">수정</button>
             </div>
+            
+            <!-- D-day 카운터 -->
+            <div id="ddaySection" style="display: none; margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; text-align: center;">
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px;">🎯 목표 달성까지</div>
+                <div id="ddayDisplay" style="font-size: 2rem; font-weight: 800;">D-30</div>
+                <div id="targetDateDisplay" style="font-size: 0.85rem; opacity: 0.8; margin-top: 5px;">2025-06-30</div>
+            </div>
+            
+            <!-- 진행률 바 -->
+            <div id="progressSection" style="display: none; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 0.9rem; font-weight: 600;">진행률</span>
+                    <span id="progressPercent" style="font-size: 0.9rem; font-weight: 600; color: #667eea;">0%</span>
+                </div>
+                <div style="background: #e0e0e0; border-radius: 20px; height: 12px; overflow: hidden;">
+                    <div id="progressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.5s;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.85rem; color: #666;">
+                    <span id="startWeightDisplay">시작: 70kg</span>
+                    <span id="goalWeightDisplay">목표: 65kg</span>
+                </div>
+            </div>
+            
             <div class="goal-box">
                 <div class="goal-grid">
                     <div class="goal-item">
@@ -692,6 +724,18 @@
                     <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 10px;">최소 3일 이상의 기록이 필요합니다</div>
                 </div>
             </div>
+        </div>
+
+        <!-- 체중 예측 그래프 -->
+        <div id="predictionCard" class="card hidden">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📈 체중 감량 예측</h2>
+                <button class="btn btn-small btn-secondary" onclick="updatePredictionChart()">🔄 새로고침</button>
+            </div>
+            <div id="predictionMessage" style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 20px; text-align: center; font-weight: 600;">
+                데이터 분석 중...
+            </div>
+            <canvas id="predictionChart" style="max-height: 300px;"></canvas>
         </div>
 
         <!-- 일일 기록 -->
@@ -1365,6 +1409,224 @@
         </div>
     </div>
 
+    <!-- 식단 추천 모달 -->
+    <div id="mealRecommendModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🍽️ 오늘의 추천 식단</h3>
+                <button class="close" onclick="closeMealRecommendModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 20px; text-align: center;">
+                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 5px;">목표 칼로리</div>
+                    <div id="recommendTargetCal" style="font-size: 2rem; font-weight: 800;">0 kcal</div>
+                    <div id="recommendMacros" style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">단백질 0g / 탄수 0g / 지방 0g</div>
+                </div>
+
+                <div id="recommendedMeals">
+                    <div class="meal-recommend-section">
+                        <h4 style="color: #667eea; margin-bottom: 10px;">🌅 아침</h4>
+                        <div id="breakfastRecommend" style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                            추천 생성 중...
+                        </div>
+                    </div>
+
+                    <div class="meal-recommend-section">
+                        <h4 style="color: #667eea; margin-bottom: 10px;">🌞 점심</h4>
+                        <div id="lunchRecommend" style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                            추천 생성 중...
+                        </div>
+                    </div>
+
+                    <div class="meal-recommend-section">
+                        <h4 style="color: #667eea; margin-bottom: 10px;">🌙 저녁</h4>
+                        <div id="dinnerRecommend" style="padding: 10px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                            추천 생성 중...
+                        </div>
+                    </div>
+
+                    <div class="meal-recommend-section">
+                        <h4 style="color: #667eea; margin-bottom: 10px;">🍪 간식</h4>
+                        <div id="snackRecommend" style="padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                            추천 생성 중...
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="generateMealRecommendation()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    🔄 새로운 식단 추천받기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 운동 루틴 추천 모달 -->
+    <div id="workoutRoutineModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🏋️ 맞춤 운동 루틴</h3>
+                <button class="close" onclick="closeWorkoutRoutineModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">운동 목표</label>
+                    <select id="workoutGoalSelect" onchange="generateWorkoutRoutine()" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                        <option value="weight_loss">체중 감량 (유산소 중심)</option>
+                        <option value="muscle">근력 향상 (웨이트 중심)</option>
+                        <option value="endurance">체력 향상 (밸런스)</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">난이도</label>
+                    <select id="workoutDifficultySelect" onchange="generateWorkoutRoutine()" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                        <option value="beginner">초급 (운동 입문자)</option>
+                        <option value="intermediate">중급 (주 2-3회 운동)</option>
+                        <option value="advanced">고급 (주 4회 이상)</option>
+                    </select>
+                </div>
+
+                <div id="workoutRoutineContent">
+                    <div style="padding: 40px; text-align: center; color: #999;">
+                        위에서 목표와 난이도를 선택하면<br>맞춤 운동 루틴이 생성됩니다!
+                    </div>
+                </div>
+
+                <button onclick="generateWorkoutRoutine()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    🔄 새 루틴 생성
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 근육 지도 모달 -->
+    <div id="muscleMapModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💪 근육 운동 지도</h3>
+                <button class="close" onclick="closeMuscleMapModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 20px; text-align: center;">
+                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 5px;">균형 점수</div>
+                    <div id="muscleBalanceScore" style="font-size: 2.5rem; font-weight: 800;">0%</div>
+                    <div style="font-size: 0.85rem; opacity: 0.9; margin-top: 5px;">전신 운동 밸런스</div>
+                </div>
+
+                <!-- 신체 부위 상태 -->
+                <div id="muscleMapDisplay" style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px;">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h4 style="margin: 0 0 10px 0;">🎨 상태 표시</h4>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div style="width: 20px; height: 20px; background: #4caf50; border-radius: 4px;"></div>
+                            <span style="font-size: 0.9rem;">충분 (1-2일 내)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div style="width: 20px; height: 20px; background: #ffc107; border-radius: 4px;"></div>
+                            <span style="font-size: 0.9rem;">회복중 (2-3일)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <div style="width: 20px; height: 20px; background: #f44336; border-radius: 4px;"></div>
+                            <span style="font-size: 0.9rem;">소홀 (3일+)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="updateMuscleMap()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    🔄 새로고침
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 주간 리포트 모달 -->
+    <div id="weeklyReportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📊 주간 리포트</h3>
+                <button class="close" onclick="closeWeeklyReportModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 20px; text-align: center;">
+                    <div id="reportPeriod" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">이번 주</div>
+                    <div id="reportWeightChange" style="font-size: 2.5rem; font-weight: 800;">-0.0kg</div>
+                    <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 5px;">체중 변화</div>
+                </div>
+
+                <div id="weeklyReportContent">
+                    <p style="text-align: center; color: #999; padding: 40px;">
+                        리포트 생성 중...
+                    </p>
+                </div>
+
+                <button onclick="generateWeeklyReport()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    🔄 리포트 새로고침
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 코칭 모달 -->
+    <div id="aiCoachModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🧠 AI 코치</h3>
+                <button class="close" onclick="closeAICoachModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <!-- 오늘의 메시지 -->
+                <div style="padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white; margin-bottom: 20px;">
+                    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 15px;">💬 오늘의 메시지</div>
+                    <div id="todayCoachMessage" style="font-size: 1rem; line-height: 1.8;">
+                        메시지 로딩 중...
+                    </div>
+                </div>
+
+                <!-- 질문하기 -->
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">💭 AI에게 질문하기</label>
+                    <select id="aiQuestionSelect" onchange="answerQuestion()" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-bottom: 10px;">
+                        <option value="">질문을 선택하세요</option>
+                        <option value="plateau">체중이 안 빠져요. 정체기인가요?</option>
+                        <option value="cheat">치팅데이는 언제 해야 하나요?</option>
+                        <option value="protein">단백질을 얼마나 먹어야 하나요?</option>
+                        <option value="cardio">유산소와 근력운동 비율은?</option>
+                        <option value="water">물은 얼마나 마셔야 하나요?</option>
+                        <option value="sleep">수면과 다이어트의 관계는?</option>
+                        <option value="yoyo">요요 방지 방법은?</option>
+                    </select>
+                    <div id="aiAnswer" style="padding: 15px; background: #f8f9fa; border-radius: 8px; display: none;">
+                        <!-- 답변 표시 -->
+                    </div>
+                </div>
+
+                <!-- 주간 분석 -->
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin: 0 0 15px 0; color: #667eea;">📈 이번 주 분석</h4>
+                    <div id="weeklyAnalysis">
+                        분석 중...
+                    </div>
+                </div>
+
+                <!-- 추천 행동 -->
+                <div style="padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 5px solid #ffc107;">
+                    <h4 style="margin: 0 0 10px 0;">💡 추천 행동</h4>
+                    <div id="recommendedActions">
+                        로딩 중...
+                    </div>
+                </div>
+
+                <button onclick="refreshAICoach()" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                    🔄 새로고침
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 기록 수정 모달 -->
     <div id="editRecordModal" class="modal">
         <div class="modal-content">
@@ -1749,10 +2011,13 @@
             if(settings) {
                 document.getElementById('settingsCard').classList.add('hidden');
                 document.getElementById('goalCard').classList.remove('hidden');
+                document.getElementById('predictionCard').classList.remove('hidden');
                 document.getElementById('feedbackCard').classList.remove('hidden');
                 document.getElementById('recordCard').classList.remove('hidden');
                 document.getElementById('historyCard').classList.remove('hidden');
                 showGoals(settings);
+                updateDdayDisplay(); // D-day 표시
+                updatePredictionChart(); // 예측 그래프
                 generateFeedback(); // AI 피드백 생성
             } else {
                 document.getElementById('settingsCard').classList.remove('hidden');
@@ -1888,7 +2153,10 @@
                 fat: +document.getElementById('bodyFat').value || 0,
                 target: +document.getElementById('targetWeight').value,
                 targetFat: +document.getElementById('targetBodyFat').value || 0,
-                activity: +document.getElementById('activityLevel').value
+                targetDate: document.getElementById('targetDate').value || '',
+                activity: +document.getElementById('activityLevel').value,
+                startWeight: +document.getElementById('currentWeight').value,
+                startDate: new Date().toISOString()
             };
             
             console.log('입력값:', s);
@@ -1909,6 +2177,7 @@
             
             console.log('showGoals 호출');
             showGoals(s);
+            updateDdayDisplay();
             
             alert('설정 완료! 💪');
         }
@@ -4019,6 +4288,946 @@
             }
         }
 
+        // ===== 식단 추천 모달 =====
+        function openMealRecommendModal() {
+            document.getElementById('mealRecommendModal').style.display = 'flex';
+            calculateTargetCalories();
+            generateMealRecommendation();
+        }
+        
+        function closeMealRecommendModal() {
+            document.getElementById('mealRecommendModal').style.display = 'none';
+        }
+
+        function calculateTargetCalories() {
+            const s = JSON.parse(localStorage.getItem('settings'));
+            if (!s) return;
+            
+            // TDEE 계산
+            const bmr = s.gender === 'male' 
+                ? 10 * s.weight + 6.25 * s.height - 5 * s.age + 5
+                : 10 * s.weight + 6.25 * s.height - 5 * s.age - 161;
+            const tdee = Math.round(bmr * (s.activityLevel || 1.55));
+            
+            // 감량 목표 (하루 500kcal 적자)
+            const targetCal = tdee - 500;
+            
+            // 매크로 비율 (단백질 30%, 탄수화물 40%, 지방 30%)
+            const protein = Math.round((targetCal * 0.3) / 4); // 1g = 4kcal
+            const carbs = Math.round((targetCal * 0.4) / 4);
+            const fats = Math.round((targetCal * 0.3) / 9); // 1g = 9kcal
+            
+            document.getElementById('recommendTargetCal').textContent = targetCal + ' kcal';
+            document.getElementById('recommendMacros').textContent = 
+                `단백질 ${protein}g / 탄수화물 ${carbs}g / 지방 ${fats}g`;
+            
+            return { targetCal, protein, carbs, fats };
+        }
+
+        function generateMealRecommendation() {
+            const target = calculateTargetCalories();
+            if (!target) return;
+            
+            // 끼니별 칼로리 배분 (아침 25%, 점심 35%, 저녁 30%, 간식 10%)
+            const breakfastCal = Math.round(target.targetCal * 0.25);
+            const lunchCal = Math.round(target.targetCal * 0.35);
+            const dinnerCal = Math.round(target.targetCal * 0.30);
+            const snackCal = Math.round(target.targetCal * 0.10);
+            
+            // 음식 DB에서 랜덤 조합
+            const breakfast = generateMealCombination(breakfastCal, ['밥/면류', '계란', '유제품', '과일']);
+            const lunch = generateMealCombination(lunchCal, ['밥/면류', '고기/생선', '채소']);
+            const dinner = generateMealCombination(dinnerCal, ['밥/면류', '고기/생선', '채소', '국/찌개']);
+            const snack = generateMealCombination(snackCal, ['과일', '견과류', '유제품']);
+            
+            // UI 업데이트
+            displayMealRecommendation('breakfastRecommend', breakfast, breakfastCal);
+            displayMealRecommendation('lunchRecommend', lunch, lunchCal);
+            displayMealRecommendation('dinnerRecommend', dinner, dinnerCal);
+            displayMealRecommendation('snackRecommend', snack, snackCal);
+        }
+
+        function generateMealCombination(targetCal, categories) {
+            const foods = [];
+            let totalCal = 0;
+            
+            // 카테고리별 음식 필터링 (간단한 키워드 매칭)
+            const categoryKeywords = {
+                '밥/면류': ['밥', '면', '국수', '파스타', '우동', '라면'],
+                '고기/생선': ['고기', '닭', '소', '돼지', '생선', '참치', '연어', '삼겹살'],
+                '계란': ['계란', '달걀'],
+                '채소': ['샐러드', '김치', '나물', '채소'],
+                '국/찌개': ['국', '찌개', '탕', '스프'],
+                '과일': ['사과', '바나나', '딸기', '오렌지', '포도', '수박', '복숭아'],
+                '유제품': ['우유', '요거트', '치즈'],
+                '견과류': ['아몬드', '호두', '땅콩']
+            };
+            
+            // 각 카테고리에서 1개씩 선택
+            categories.forEach(category => {
+                const keywords = categoryKeywords[category] || [];
+                const matchedFoods = foodDB.filter(f => 
+                    keywords.some(kw => f.name.includes(kw))
+                );
+                
+                if (matchedFoods.length > 0) {
+                    const randomFood = matchedFoods[Math.floor(Math.random() * matchedFoods.length)];
+                    // 적절한 양 계산 (목표 칼로리의 일부)
+                    const portionCal = Math.min(targetCal - totalCal, randomFood.cal * 2);
+                    const amount = Math.round((portionCal / randomFood.cal) * 100);
+                    
+                    if (amount > 0 && amount <= 500) { // 최대 500g
+                        foods.push({
+                            name: randomFood.name,
+                            amount: amount,
+                            cal: Math.round(randomFood.cal * amount / 100),
+                            pro: Math.round(randomFood.pro * amount / 100),
+                            carb: Math.round(randomFood.carb * amount / 100),
+                            fat: Math.round(randomFood.fat * amount / 100)
+                        });
+                        totalCal += foods[foods.length - 1].cal;
+                    }
+                }
+            });
+            
+            return foods;
+        }
+
+        function displayMealRecommendation(elementId, foods, targetCal) {
+            const elem = document.getElementById(elementId);
+            if (foods.length === 0) {
+                elem.innerHTML = '<p style="color: #999; text-align: center;">추천 식단을 생성할 수 없습니다</p>';
+                return;
+            }
+            
+            let totalCal = foods.reduce((sum, f) => sum + f.cal, 0);
+            let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+            
+            foods.forEach(food => {
+                html += `
+                    <div style="padding: 10px; background: white; border-radius: 6px; border-left: 4px solid #667eea;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 600;">${food.name}</span>
+                            <span style="color: #667eea; font-weight: 600;">${food.amount}g</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">
+                            ${food.cal}kcal | 단 ${food.pro}g | 탄 ${food.carb}g | 지 ${food.fat}g
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                </div>
+                <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 6px; text-align: center; font-weight: 600;">
+                    총 ${totalCal}kcal / 목표 ${targetCal}kcal
+                </div>
+            `;
+            
+            elem.innerHTML = html;
+        }
+
+        // ===== 운동 루틴 추천 모달 =====
+        function openWorkoutRoutineModal() {
+            document.getElementById('workoutRoutineModal').style.display = 'flex';
+            generateWorkoutRoutine();
+        }
+        
+        function closeWorkoutRoutineModal() {
+            document.getElementById('workoutRoutineModal').style.display = 'none';
+        }
+
+        function generateWorkoutRoutine() {
+            const goal = document.getElementById('workoutGoalSelect').value;
+            const difficulty = document.getElementById('workoutDifficultySelect').value;
+            
+            const routines = {
+                weight_loss: {
+                    beginner: [
+                        { day: '월', exercises: ['걷기 빠르게 30분', '스쿼트 3세트 x 10회', '플랭크 3세트 x 20초'] },
+                        { day: '수', exercises: ['조깅 20분', '런지 3세트 x 10회', '크런치 3세트 x 15회'] },
+                        { day: '금', exercises: ['자전거 30분', '버피 3세트 x 5회', '마운틴 클라이머 3세트 x 10회'] }
+                    ],
+                    intermediate: [
+                        { day: '월', exercises: ['달리기 8km/h 30분', '스쿼트 4세트 x 15회', '플랭크 4세트 x 40초', '점핑잭 3세트 x 30회'] },
+                        { day: '화', exercises: ['수영 30분', '버피 4세트 x 10회', '마운틴 클라이머 4세트 x 20회'] },
+                        { day: '목', exercises: ['인터벌 러닝 30분', '런지 4세트 x 15회', '사이클 크런치 4세트 x 20회'] },
+                        { day: '토', exercises: ['등산 1시간', '스쿼트 점프 3세트 x 10회'] }
+                    ],
+                    advanced: [
+                        { day: '월', exercises: ['HIIT 러닝 40분', '스쿼트 5세트 x 20회', '버피 5세트 x 15회', '플랭크 5세트 x 60초'] },
+                        { day: '화', exercises: ['크로스핏 40분', '케틀벨 스윙 5세트 x 15회', '박스 점프 5세트 x 10회'] },
+                        { day: '수', exercises: ['달리기 10km/h 40분', '마운틴 클라이머 5세트 x 30회', '점핑 런지 5세트 x 15회'] },
+                        { day: '목', exercises: ['수영 40분', '타바타 트레이닝 20분'] },
+                        { day: '금', exercises: ['사이클링 50분', '버피 5세트 x 20회', '플랭크 투 푸시업 5세트 x 10회'] }
+                    ]
+                },
+                muscle: {
+                    beginner: [
+                        { day: '월', exercises: ['팔굽혀펴기 3세트 x 10회', '덤벨 컬 3세트 x 12회', '스쿼트 3세트 x 15회'] },
+                        { day: '수', exercises: ['풀업 3세트 x 5회', '숄더 프레스 3세트 x 10회', '플랭크 3세트 x 30초'] },
+                        { day: '금', exercises: ['벤치프레스 3세트 x 10회', '데드리프트 3세트 x 8회', '레그 프레스 3세트 x 12회'] }
+                    ],
+                    intermediate: [
+                        { day: '월', exercises: ['벤치프레스 4세트 x 12회', '인클라인 프레스 4세트 x 10회', '딥스 3세트 x 10회', '삼두 익스텐션 3세트 x 15회'] },
+                        { day: '화', exercises: ['스쿼트 4세트 x 12회', '레그 프레스 4세트 x 15회', '레그 컬 3세트 x 12회', '카프 레이즈 4세트 x 20회'] },
+                        { day: '목', exercises: ['데드리프트 4세트 x 10회', '바벨 로우 4세트 x 12회', '풀업 3세트 x 8회', '시티드 로우 3세트 x 12회'] },
+                        { day: '토', exercises: ['숄더 프레스 4세트 x 12회', '레터럴 레이즈 3세트 x 15회', '덤벨 컬 4세트 x 12회', '해머 컬 3세트 x 15회'] }
+                    ],
+                    advanced: [
+                        { day: '월', exercises: ['벤치프레스 5세트 x 15회', '인클라인 프레스 5세트 x 12회', '딥스 가중 4세트 x 10회', '케이블 플라이 4세트 x 15회'] },
+                        { day: '화', exercises: ['스쿼트 5세트 x 15회', '프론트 스쿼트 4세트 x 12회', '레그 익스텐션 4세트 x 15회', '레그 컬 4세트 x 15회'] },
+                        { day: '수', exercises: ['데드리프트 5세트 x 12회', '바벨 로우 5세트 x 15회', '풀업 가중 4세트 x 10회', 'T-바 로우 4세트 x 12회'] },
+                        { day: '목', exercises: ['숄더 프레스 5세트 x 15회', '레터럴 레이즈 4세트 x 20회', '프론트 레이즈 4세트 x 15회', '페이스 풀 4세트 x 15회'] },
+                        { day: '금', exercises: ['바벨 컬 5세트 x 15회', '해머 컬 4세트 x 15회', '트라이셉 익스텐션 5세트 x 15회', '스컬 크러셔 4세트 x 12회'] }
+                    ]
+                },
+                endurance: {
+                    beginner: [
+                        { day: '월', exercises: ['걷기 빠르게 25분', '스쿼트 3세트 x 12회', '플랭크 3세트 x 25초'] },
+                        { day: '수', exercises: ['수영 20분', '팔굽혀펴기 3세트 x 8회', '크런치 3세트 x 15회'] },
+                        { day: '금', exercises: ['자전거 25분', '런지 3세트 x 10회', '버피 3세트 x 5회'] }
+                    ],
+                    intermediate: [
+                        { day: '월', exercises: ['달리기 30분', '스쿼트 4세트 x 15회', '풀업 3세트 x 6회', '플랭크 4세트 x 40초'] },
+                        { day: '화', exercises: ['수영 35분', '팔굽혀펴기 4세트 x 12회', '레그 레이즈 4세트 x 15회'] },
+                        { day: '목', exercises: ['자전거 40분', '데드리프트 3세트 x 10회', '런지 4세트 x 12회'] },
+                        { day: '토', exercises: ['등산 1시간', '버피 4세트 x 10회', '마운틴 클라이머 4세트 x 20회'] }
+                    ],
+                    advanced: [
+                        { day: '월', exercises: ['인터벌 러닝 40분', '스쿼트 5세트 x 20회', '풀업 4세트 x 10회', '플랭크 5세트 x 60초'] },
+                        { day: '화', exercises: ['수영 45분', '벤치프레스 4세트 x 12회', '덤벨 로우 4세트 x 15회'] },
+                        { day: '수', exercises: ['크로스핏 40분', '데드리프트 4세트 x 12회', '버피 5세트 x 15회'] },
+                        { day: '목', exercises: ['사이클링 50분', '숄더 프레스 4세트 x 12회', '레터럴 레이즈 4세트 x 15회'] },
+                        { day: '금', exercises: ['달리기 10km/h 40분', '케틀벨 스윙 5세트 x 20회', '박스 점프 4세트 x 12회'] },
+                        { day: '토', exercises: ['등산 1.5시간', '전신 스트레칭 20분'] }
+                    ]
+                }
+            };
+            
+            const routine = routines[goal][difficulty];
+            let html = '<div style="display: flex; flex-direction: column; gap: 15px;">';
+            
+            routine.forEach((day, index) => {
+                html += `
+                    <div style="padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 1.1rem;">${day.day}요일</h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${day.exercises.map(ex => `
+                                <div style="padding: 8px; background: rgba(255,255,255,0.2); border-radius: 6px; font-size: 0.95rem;">
+                                    ✓ ${ex}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            const goalText = {
+                weight_loss: '체중 감량',
+                muscle: '근력 향상',
+                endurance: '체력 향상'
+            };
+            const diffText = {
+                beginner: '초급',
+                intermediate: '중급',
+                advanced: '고급'
+            };
+            
+            html = `
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: #667eea;">${goalText[goal]} / ${diffText[difficulty]}</div>
+                    <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">주 ${routine.length}회 운동</div>
+                </div>
+            ` + html;
+            
+            document.getElementById('workoutRoutineContent').innerHTML = html;
+        }
+
+        // ===== 근육 지도 모달 =====
+        function openMuscleMapModal() {
+            document.getElementById('muscleMapModal').style.display = 'flex';
+            updateMuscleMap();
+        }
+        
+        function closeMuscleMapModal() {
+            document.getElementById('muscleMapModal').style.display = 'none';
+        }
+
+        function updateMuscleMap() {
+            const recs = JSON.parse(localStorage.getItem('records') || '[]');
+            const today = new Date();
+            
+            // 신체 부위별 운동 매핑
+            const muscleGroups = {
+                '가슴': ['팔굽혀펴기', '벤치프레스', '인클라인', '딥스', '플라이', '체스트'],
+                '등': ['풀업', '친업', '로우', '데드리프트', '렛풀다운'],
+                '어깨': ['숄더', '프레스', '레터럴', '프론트 레이즈', '밀리터리'],
+                '팔': ['컬', '삼두', '트라이셉', '바이셉', '해머'],
+                '복근': ['크런치', '플랭크', '싯업', '레그레이즈', '러시안 트위스트', '마운틴 클라이머'],
+                '하체': ['스쿼트', '런지', '레그', '카프', '데드리프트', '레그 프레스']
+            };
+            
+            const muscleStatus = {};
+            
+            // 각 부위별 마지막 운동 날짜 찾기
+            Object.keys(muscleGroups).forEach(muscle => {
+                let lastWorkout = null;
+                
+                recs.forEach(rec => {
+                    if (rec.exercises && rec.exercises.length > 0) {
+                        const hasExercise = rec.exercises.some(ex => 
+                            muscleGroups[muscle].some(keyword => ex.name.includes(keyword))
+                        );
+                        
+                        if (hasExercise) {
+                            const recDate = new Date(rec.date);
+                            if (!lastWorkout || recDate > lastWorkout) {
+                                lastWorkout = recDate;
+                            }
+                        }
+                    }
+                });
+                
+                if (lastWorkout) {
+                    const daysSince = Math.floor((today - lastWorkout) / (1000 * 60 * 60 * 24));
+                    muscleStatus[muscle] = {
+                        daysSince,
+                        lastDate: lastWorkout,
+                        status: daysSince <= 2 ? 'good' : daysSince <= 3 ? 'warning' : 'danger'
+                    };
+                } else {
+                    muscleStatus[muscle] = {
+                        daysSince: 999,
+                        lastDate: null,
+                        status: 'danger'
+                    };
+                }
+            });
+            
+            // 균형 점수 계산
+            const goodCount = Object.values(muscleStatus).filter(s => s.status === 'good').length;
+            const balanceScore = Math.round((goodCount / Object.keys(muscleGroups).length) * 100);
+            
+            document.getElementById('muscleBalanceScore').textContent = balanceScore + '%';
+            
+            // UI 생성
+            const statusColors = {
+                good: '#4caf50',
+                warning: '#ffc107',
+                danger: '#f44336'
+            };
+            
+            const statusText = {
+                good: '충분',
+                warning: '회복중',
+                danger: '소홀'
+            };
+            
+            let html = '';
+            Object.keys(muscleStatus).forEach(muscle => {
+                const status = muscleStatus[muscle];
+                const color = statusColors[status.status];
+                const dateText = status.lastDate 
+                    ? `${status.daysSince}일 전` 
+                    : '기록 없음';
+                
+                html += `
+                    <div style="padding: 15px; background: white; border-radius: 8px; border-left: 5px solid ${color};">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <span style="font-weight: 600; font-size: 1.1rem;">${muscle}</span>
+                            <span style="padding: 4px 12px; background: ${color}; color: white; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">
+                                ${statusText[status.status]}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666;">
+                            마지막 운동: ${dateText}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('muscleMapDisplay').innerHTML = html;
+            
+            // 추천 운동 표시
+            const neglectedMuscles = Object.keys(muscleStatus)
+                .filter(m => muscleStatus[m].status === 'danger')
+                .slice(0, 2);
+            
+            if (neglectedMuscles.length > 0) {
+                const recommendations = neglectedMuscles.map(muscle => {
+                    const exercises = muscleGroups[muscle].slice(0, 2).join(', ');
+                    return `<strong>${muscle}</strong>: ${exercises}`;
+                }).join('<br>');
+                
+                html += `
+                    <div style="padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 5px solid #ffc107; margin-top: 15px;">
+                        <div style="font-weight: 600; margin-bottom: 8px;">⚠️ 추천 운동</div>
+                        <div style="font-size: 0.9rem; line-height: 1.6;">${recommendations}</div>
+                    </div>
+                `;
+                
+                document.getElementById('muscleMapDisplay').innerHTML = html;
+            }
+        }
+
+        // ===== 주간 리포트 =====
+        function openWeeklyReportModal() {
+            document.getElementById('weeklyReportModal').style.display = 'flex';
+            generateWeeklyReport();
+        }
+        
+        function closeWeeklyReportModal() {
+            document.getElementById('weeklyReportModal').style.display = 'none';
+        }
+
+        function generateWeeklyReport() {
+            const recs = JSON.parse(localStorage.getItem('records') || '[]');
+            const s = JSON.parse(localStorage.getItem('settings'));
+            
+            if (recs.length < 7) {
+                document.getElementById('weeklyReportContent').innerHTML = `
+                    <p style="text-align: center; color: #999; padding: 40px;">
+                        최소 7일 이상의 기록이 필요합니다!<br>
+                        꾸준히 기록해보세요 💪
+                    </p>
+                `;
+                return;
+            }
+            
+            // 최근 7일 데이터
+            const sortedRecs = recs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const last7Days = sortedRecs.slice(0, 7);
+            
+            // 기간 표시
+            const startDate = new Date(last7Days[6].date);
+            const endDate = new Date(last7Days[0].date);
+            document.getElementById('reportPeriod').textContent = 
+                `${startDate.getMonth()+1}/${startDate.getDate()} ~ ${endDate.getMonth()+1}/${endDate.getDate()}`;
+            
+            // 체중 변화
+            const startWeight = last7Days[6].weight || 0;
+            const endWeight = last7Days[0].weight || 0;
+            const weightChange = endWeight - startWeight;
+            document.getElementById('reportWeightChange').textContent = 
+                (weightChange > 0 ? '+' : '') + weightChange.toFixed(1) + 'kg';
+            document.getElementById('reportWeightChange').style.color = 
+                weightChange < 0 ? '#4caf50' : weightChange > 0 ? '#f44336' : 'white';
+            
+            // 통계 계산
+            const avgCal = Math.round(last7Days.reduce((sum, r) => sum + (r.cal || 0), 0) / 7);
+            const avgPro = Math.round(last7Days.reduce((sum, r) => sum + (r.pro || 0), 0) / 7);
+            const avgCarb = Math.round(last7Days.reduce((sum, r) => sum + (r.carb || 0), 0) / 7);
+            const avgFat = Math.round(last7Days.reduce((sum, r) => sum + (r.fat || 0), 0) / 7);
+            const totalExercises = last7Days.reduce((sum, r) => sum + (r.exercises ? r.exercises.length : 0), 0);
+            const avgWater = Math.round(last7Days.reduce((sum, r) => sum + (r.water || 0), 0) / 7);
+            const recordStreak = calculateStreak(recs);
+            
+            // 목표 대비
+            const targetCal = s ? calculateTDEE(s) - 500 : 1500;
+            const calDiff = avgCal - targetCal;
+            const targetPro = s ? Math.round(s.weight * 1.6) : 70;
+            
+            // 잘한 점 찾기
+            const goodPoints = [];
+            if (recordStreak >= 7) goodPoints.push(`${recordStreak}일 연속 기록! 🔥`);
+            if (Math.abs(calDiff) < 100) goodPoints.push('목표 칼로리 완벽! 👍');
+            if (totalExercises >= 3) goodPoints.push(`운동 ${totalExercises}회 완료! 💪`);
+            if (weightChange < -0.3) goodPoints.push(`체중 ${Math.abs(weightChange).toFixed(1)}kg 감량! 🎉`);
+            if (avgPro >= targetPro * 0.9) goodPoints.push('단백질 섭취 충분! 🥩');
+            if (avgWater >= 1800) goodPoints.push('물 섭취 우수! 💧');
+            
+            // 개선점 찾기
+            const improvements = [];
+            if (calDiff > 200) improvements.push(`평균 칼로리 ${calDiff}kcal 초과 (목표: ${targetCal}kcal)`);
+            if (totalExercises < 3) improvements.push('운동 횟수 부족 (주 3회 권장)');
+            if (avgPro < targetPro * 0.8) improvements.push(`단백질 부족 (평균 ${avgPro}g, 목표 ${targetPro}g)`);
+            if (avgWater < 1500) improvements.push('물 섭취 부족 (하루 2L 권장)');
+            
+            // 요일별 패턴 분석
+            const dayPatterns = analyzeDayPatterns(last7Days);
+            
+            // 이번 주 목표
+            const nextWeekGoals = [];
+            if (calDiff > 100) nextWeekGoals.push('평균 칼로리 줄이기');
+            if (avgPro < targetPro) nextWeekGoals.push('단백질 섭취 늘리기');
+            if (totalExercises < 4) nextWeekGoals.push('운동 1회 추가하기');
+            if (nextWeekGoals.length === 0) nextWeekGoals.push('현재 페이스 유지!');
+            
+            // HTML 생성
+            let html = `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #4caf50; margin-bottom: 10px;">✅ 잘한 점</h4>
+                    <div style="background: #f1f8f4; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;">
+                        ${goodPoints.length > 0 
+                            ? goodPoints.map(p => `<div style="margin-bottom: 8px;">• ${p}</div>`).join('') 
+                            : '<div style="color: #999;">더 열심히 해봐요!</div>'}
+                    </div>
+                </div>
+                
+                ${improvements.length > 0 ? `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #ff9800; margin-bottom: 10px;">⚠️ 개선점</h4>
+                    <div style="background: #fff8e1; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;">
+                        ${improvements.map(p => `<div style="margin-bottom: 8px;">• ${p}</div>`).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">📊 주간 통계</h4>
+                    <div style="background: white; padding: 15px; border-radius: 8px; border: 2px solid #e0e0e0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div><strong>평균 칼로리:</strong> ${avgCal}kcal</div>
+                            <div><strong>운동 횟수:</strong> ${totalExercises}회</div>
+                            <div><strong>평균 단백질:</strong> ${avgPro}g</div>
+                            <div><strong>평균 물:</strong> ${avgWater}ml</div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${dayPatterns ? `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #9c27b0; margin-bottom: 10px;">🔍 패턴 분석</h4>
+                    <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0;">
+                        ${dayPatterns}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #2196f3; margin-bottom: 10px;">🎯 이번 주 목표</h4>
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+                        ${nextWeekGoals.map(g => `<div style="margin-bottom: 8px;">• ${g}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('weeklyReportContent').innerHTML = html;
+        }
+
+        function calculateStreak(recs) {
+            if (recs.length === 0) return 0;
+            
+            const sorted = recs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            let streak = 0;
+            let checkDate = new Date(today);
+            
+            for (let i = 0; i < sorted.length; i++) {
+                const recDate = new Date(sorted[i].date);
+                recDate.setHours(0, 0, 0, 0);
+                
+                if (recDate.getTime() === checkDate.getTime()) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else if (recDate < checkDate) {
+                    break;
+                }
+            }
+            
+            return streak;
+        }
+
+        function analyzeDayPatterns(last7Days) {
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const dayStats = {};
+            
+            last7Days.forEach(rec => {
+                const date = new Date(rec.date);
+                const dayName = dayNames[date.getDay()];
+                
+                if (!dayStats[dayName]) {
+                    dayStats[dayName] = { cal: 0, count: 0 };
+                }
+                
+                dayStats[dayName].cal += rec.cal || 0;
+                dayStats[dayName].count++;
+            });
+            
+            // 평균 계산 & 가장 높은/낮은 요일 찾기
+            let maxDay = null, maxCal = 0;
+            let minDay = null, minCal = 9999;
+            
+            Object.keys(dayStats).forEach(day => {
+                const avg = dayStats[day].cal / dayStats[day].count;
+                if (avg > maxCal) {
+                    maxCal = avg;
+                    maxDay = day;
+                }
+                if (avg < minCal) {
+                    minCal = avg;
+                    minDay = day;
+                }
+            });
+            
+            if (maxDay && minDay && maxCal - minCal > 300) {
+                return `<strong>${maxDay}요일</strong> 칼로리가 높고 (${Math.round(maxCal)}kcal), <strong>${minDay}요일</strong>이 낮네요 (${Math.round(minCal)}kcal). ${maxDay}요일 식단을 조절해보세요!`;
+            }
+            
+            return null;
+        }
+
+        function calculateTDEE(settings) {
+            const bmr = settings.gender === 'male' 
+                ? 10 * settings.weight + 6.25 * settings.height - 5 * settings.age + 5
+                : 10 * settings.weight + 6.25 * settings.height - 5 * settings.age - 161;
+            return Math.round(bmr * (settings.activityLevel || 1.55));
+        }
+
+        // ===== AI 코칭 =====
+        function openAICoachModal() {
+            document.getElementById('aiCoachModal').style.display = 'flex';
+            refreshAICoach();
+        }
+        
+        function closeAICoachModal() {
+            document.getElementById('aiCoachModal').style.display = 'none';
+        }
+
+        function refreshAICoach() {
+            generateDailyMessage();
+            generateWeeklyAnalysis();
+            generateRecommendedActions();
+        }
+
+        function generateDailyMessage() {
+            const recs = JSON.parse(localStorage.getItem('records') || '[]');
+            const s = JSON.parse(localStorage.getItem('settings'));
+            
+            if (recs.length === 0) {
+                document.getElementById('todayCoachMessage').innerHTML = 
+                    '안녕하세요! 오늘부터 기록을 시작해보세요. 꾸준함이 성공의 열쇠입니다! 💪';
+                return;
+            }
+            
+            const sorted = recs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const streak = calculateStreak(recs);
+            const recentWeight = sorted[0].weight || 0;
+            const startWeight = s ? s.startWeight || s.weight : recentWeight;
+            const totalLoss = startWeight - recentWeight;
+            const targetWeight = s ? s.target : recentWeight - 5;
+            const remaining = recentWeight - targetWeight;
+            
+            const messages = [
+                // 연속 기록 축하
+                streak >= 30 ? `🔥 대박! ${streak}일 연속 기록 중! 이 정도면 프로예요!` : null,
+                streak >= 14 ? `🔥 ${streak}일 연속 기록! 습관이 되어가고 있어요!` : null,
+                streak >= 7 ? `🔥 ${streak}일 연속! 일주일 달성! 최고예요!` : null,
+                
+                // 체중 감량 축하
+                totalLoss >= 10 ? `🎉 와! 벌써 ${totalLoss.toFixed(1)}kg 감량! 놀라운 성과예요!` : null,
+                totalLoss >= 5 ? `🎉 ${totalLoss.toFixed(1)}kg 감량! 절반 이상 왔어요!` : null,
+                totalLoss >= 2 ? `👍 ${totalLoss.toFixed(1)}kg 감량! 좋은 시작이에요!` : null,
+                
+                // 목표까지 남은 거리
+                remaining <= 1 ? `🎯 목표까지 ${remaining.toFixed(1)}kg! 거의 다 왔어요!` : null,
+                remaining <= 3 ? `💪 목표까지 ${remaining.toFixed(1)}kg! 마지막 스퍼트!` : null,
+                
+                // 일반 격려
+                '오늘도 화이팅! 꾸준함이 답입니다 💪',
+                '한 걸음 한 걸음, 목표를 향해! 🚶',
+                '포기하지 마세요. 당신은 할 수 있어요! ✨',
+                '오늘도 최선을 다하세요! 응원합니다! 🎉'
+            ];
+            
+            const validMessages = messages.filter(m => m !== null);
+            const message = validMessages[Math.floor(Math.random() * validMessages.length)];
+            
+            document.getElementById('todayCoachMessage').innerHTML = message;
+        }
+
+        function generateWeeklyAnalysis() {
+            const recs = JSON.parse(localStorage.getItem('records') || '[]');
+            
+            if (recs.length < 7) {
+                document.getElementById('weeklyAnalysis').innerHTML = 
+                    '<p style="color: #999;">7일 이상 기록하면 주간 분석을 볼 수 있어요!</p>';
+                return;
+            }
+            
+            const sorted = recs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const last7 = sorted.slice(0, 7);
+            
+            const avgCal = Math.round(last7.reduce((sum, r) => sum + (r.cal || 0), 0) / 7);
+            const exercises = last7.reduce((sum, r) => sum + (r.exercises ? r.exercises.length : 0), 0);
+            const weightChange = (last7[0].weight || 0) - (last7[6].weight || 0);
+            
+            let analysis = '<div style="line-height: 1.8;">';
+            
+            if (weightChange < -0.5) {
+                analysis += `✅ 이번 주 ${Math.abs(weightChange).toFixed(1)}kg 감량! 완벽해요!<br>`;
+            } else if (weightChange < 0) {
+                analysis += `👍 이번 주 ${Math.abs(weightChange).toFixed(1)}kg 감량. 좋은 페이스예요!<br>`;
+            } else if (weightChange === 0) {
+                analysis += `⚠️ 이번 주 체중 정체. 칼로리를 조금 더 줄여보세요.<br>`;
+            } else {
+                analysis += `⚠️ 이번 주 체중 증가. 식단을 점검해보세요!<br>`;
+            }
+            
+            if (exercises >= 4) {
+                analysis += `💪 운동 ${exercises}회! 훌륭해요!<br>`;
+            } else if (exercises >= 2) {
+                analysis += `🏃 운동 ${exercises}회. 조금 더 늘려봐요!<br>`;
+            } else {
+                analysis += `⚠️ 운동이 부족해요. 주 3회 목표로!<br>`;
+            }
+            
+            analysis += '</div>';
+            
+            document.getElementById('weeklyAnalysis').innerHTML = analysis;
+        }
+
+        function generateRecommendedActions() {
+            const recs = JSON.parse(localStorage.getItem('records') || '[]');
+            const s = JSON.parse(localStorage.getItem('settings'));
+            
+            if (recs.length === 0) {
+                document.getElementById('recommendedActions').innerHTML = 
+                    '<div>• 첫 기록을 입력해보세요!<br>• 목표를 설정하세요!</div>';
+                return;
+            }
+            
+            const sorted = recs.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const last7 = sorted.slice(0, Math.min(7, sorted.length));
+            
+            const actions = [];
+            
+            // 기록 관련
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayRec = recs.find(r => {
+                const recDate = new Date(r.date);
+                recDate.setHours(0, 0, 0, 0);
+                return recDate.getTime() === today.getTime();
+            });
+            
+            if (!todayRec) {
+                actions.push('오늘의 기록을 입력하세요! 📝');
+            }
+            
+            // 칼로리
+            if (last7.length >= 3) {
+                const avgCal = last7.reduce((sum, r) => sum + (r.cal || 0), 0) / last7.length;
+                const targetCal = s ? calculateTDEE(s) - 500 : 1500;
+                
+                if (avgCal > targetCal + 200) {
+                    actions.push('칼로리를 줄여보세요 (간식 줄이기, 양 조절)');
+                }
+            }
+            
+            // 운동
+            if (last7.length >= 7) {
+                const exercises = last7.reduce((sum, r) => sum + (r.exercises ? r.exercises.length : 0), 0);
+                if (exercises < 3) {
+                    actions.push('이번 주 운동 1회 추가하기! 💪');
+                }
+            }
+            
+            // 단백질
+            if (last7.length >= 3) {
+                const avgPro = last7.reduce((sum, r) => sum + (r.pro || 0), 0) / last7.length;
+                const targetPro = s ? s.weight * 1.6 : 70;
+                
+                if (avgPro < targetPro * 0.8) {
+                    actions.push('단백질 섭취 늘리기 (닭가슴살, 계란, 두부)');
+                }
+            }
+            
+            // 물
+            if (last7.length >= 3) {
+                const avgWater = last7.reduce((sum, r) => sum + (r.water || 0), 0) / last7.length;
+                if (avgWater < 1500) {
+                    actions.push('물 많이 마시기 (하루 2L 목표)');
+                }
+            }
+            
+            if (actions.length === 0) {
+                actions.push('현재 완벽해요! 이대로 유지하세요! 🎉');
+            }
+            
+            document.getElementById('recommendedActions').innerHTML = 
+                actions.map(a => `<div style="margin-bottom: 8px;">• ${a}</div>`).join('');
+        }
+
+        function answerQuestion() {
+            const question = document.getElementById('aiQuestionSelect').value;
+            const answerDiv = document.getElementById('aiAnswer');
+            
+            if (!question) {
+                answerDiv.style.display = 'none';
+                return;
+            }
+            
+            const answers = {
+                plateau: `
+                    <h4 style="margin: 0 0 10px 0; color: #667eea;">체중 정체기 극복법</h4>
+                    <div style="line-height: 1.8;">
+                        <strong>1. 치팅데이 활용</strong><br>
+                        • 2주 연속 적자 → 1일 유지칼로리로 탄수화물 섭취<br>
+                        • 대사 회복에 도움<br><br>
+                        
+                        <strong>2. 운동 강도 변경</strong><br>
+                        • 유산소만 하던 분 → 근력운동 추가<br>
+                        • 같은 운동만 → 새로운 운동 시도<br><br>
+                        
+                        <strong>3. 칼로리 재계산</strong><br>
+                        • 체중 감소 → 기초대사량 감소<br>
+                        • 목표 칼로리 다시 계산 필요<br><br>
+                        
+                        <strong>4. 인내심!</strong><br>
+                        • 정체기는 정상적인 과정<br>
+                        • 2-3주 기다려보세요
+                    </div>
+                `,
+                cheat: `
+                    <h4 style="margin: 0 0 10px 0; color: #667eea;">치팅데이 타이밍</h4>
+                    <div style="line-height: 1.8;">
+                        <strong>언제?</strong><br>
+                        • 7-14일 연속 칼로리 적자 후<br>
+                        • 체중이 2주 이상 정체될 때<br>
+                        • 스트레스가 심할 때<br><br>
+                        
+                        <strong>어떻게?</strong><br>
+                        • 유지칼로리로 (TDEE)<br>
+                        • 탄수화물 위주 (파스타, 피자, 빵)<br>
+                        • 단백질/지방은 평소대로<br><br>
+                        
+                        <strong>효과</strong><br>
+                        • 글리코겐 재충전<br>
+                        • 대사 회복<br>
+                        • 정신적 휴식<br><br>
+                        
+                        <strong>주의!</strong><br>
+                        • 폭식 아님 (유지칼로리만!)<br>
+                        • 주 1회 이상 권장 안 함
+                    </div>
+                `,
+                protein: `
+                    <h4 style="margin: 0 0 10px 0; color: #667eea;">단백질 섭취량</h4>
+                    <div style="line-height: 1.8;">
+                        <strong>권장량</strong><br>
+                        • 일반: 체중 x 0.8~1.2g<br>
+                        • 다이어트: 체중 x 1.6~2.0g<br>
+                        • 근력운동: 체중 x 1.8~2.2g<br><br>
+                        
+                        <strong>왜 많이?</strong><br>
+                        • 포만감 증가<br>
+                        • 근손실 방지<br>
+                        • 대사량 유지<br><br>
+                        
+                        <strong>추천 음식</strong><br>
+                        • 닭가슴살 (100g = 23g)<br>
+                        • 계란 (1개 = 6g)<br>
+                        • 그릭요거트 (100g = 10g)<br>
+                        • 두부 (100g = 8g)<br>
+                        • 참치캔 (1캔 = 25g)
+                    </div>
+                `,
+                cardio: `
+                    <h4 style="margin: 0 0 10px 0; color: #667eea;">유산소 vs 근력운동</h4>
+                    <div style="line-height: 1.8;">
+                        <strong>체중 감량 목표</strong><br>
+                        • 유산소 60% : 근력 40%<br>
+                        • 주 4-5회 운동<br><br>
+                        
+                        <strong>근육 유지 목표</strong><br>
+                        • 유산소 40% : 근력 60%<br>
+                        • 주 5-6회 운동<br><br>
+                        
+                        <strong>추천 루틴</strong><br>
+                        • 월수금: 근력운동 (40-50분)<br>
+                        • 화목토: 유산소 (30-40분)<br>
+                        • 일: 휴식 또는 가벼운 걷기<br><br>
+                        
+                        <strong>Tip!</strong><br>
+                        • 근력 먼저, 유산소 나중<br>
+                        • 근력운동이 대사에 더 유리
+                    </div>
+                `,
+                water: `
+                    <h4 style="margin: 0 0 10px 0; color: #667eea;">물 섭취량</h4>
+                    <div style="line-height: 1.8;">
+                        <strong>권장량</strong><br>
+                        • 일반: 체중 x 30ml<br>
+                        • 운동 시: 체중 x 35-40ml<br>
+                        • 최소: 하루 2L<br><br>
+                        
+                        <strong>효과</strong><br>
+                        • 신진대사 촉진<br>
+                        • 노폐물 배출<br>
+                        • 포만감 증가<br>
+                        • 피부 개선<br><br>
+                        
+                        <strong>마시는 법</strong><br>
+                        • 아침 일어나자마자 1잔<br>
+                        • 식사 30분 전 1잔<br>
+                        • 운동 중 수시로<br>
+                        • 자기 전 1잔<br><br>
+                        
+                        <strong>Tip!</strong><br>
+                        • 차가운 물이 대사에 더 좋음<br>
+                        • 한 번에 많이 말고 자주!
+                    </div>
+                `,
+                sleep: `
+                    <h4 style="margin: 0 0 10px 0; color: #667eea;">수면과 다이어트</h4>
+                    <div style="line-height: 1.8;">
+                        <strong>권장 수면 시간</strong><br>
+                        • 7-9시간<br>
+                        • 부족하면 체중 증가!<br><br>
+                        
+                        <strong>수면 부족의 악영향</strong><br>
+                        • 식욕 증가 (그렐린 ↑)<br>
+                        • 포만감 감소 (렙틴 ↓)<br>
+                        • 대사 저하<br>
+                        • 스트레스 호르몬 증가<br><br>
+                        
+                        <strong>숙면 팁</strong><br>
+                        • 같은 시간 취침/기상<br>
+                        • 자기 2시간 전 운동 금지<br>
+                        • 침실 어둡고 시원하게<br>
+                        • 카페인 오후 4시 이후 금지<br><br>
+                        
+                        <strong>결론</strong><br>
+                        수면은 다이어트의 필수 요소!
+                    </div>
+                `,
+                yoyo: `
+                    <h4 style="margin: 0 0 10px 0; color: #667eea;">요요 방지법</h4>
+                    <div style="line-height: 1.8;">
+                        <strong>1. 천천히 감량</strong><br>
+                        • 주 0.5-1kg 목표<br>
+                        • 급격한 감량 = 요요 확률 ↑<br><br>
+                        
+                        <strong>2. 근력운동 필수</strong><br>
+                        • 근육 유지 = 대사량 유지<br>
+                        • 주 3회 이상 권장<br><br>
+                        
+                        <strong>3. 단백질 충분히</strong><br>
+                        • 근손실 방지<br>
+                        • 체중 x 1.6g 이상<br><br>
+                        
+                        <strong>4. 유지기 필수!</strong><br>
+                        • 목표 달성 후 2-3개월 유지<br>
+                        • 몸이 적응하는 시간<br>
+                        • 유지칼로리로 천천히 증량<br><br>
+                        
+                        <strong>5. 습관 형성</strong><br>
+                        • 다이어트 = 평생 습관<br>
+                        • 단기간 이벤트 아님!
+                    </div>
+                `
+            };
+            
+            answerDiv.innerHTML = answers[question] || '<p>답변을 준비중입니다.</p>';
+            answerDiv.style.display = 'block';
+        }
+
         // ===== Google Apps Script 연동 =====
         let appsScriptUrl = localStorage.getItem('appsScriptUrl');
 
@@ -4187,6 +5396,224 @@
                 controls.classList.add('hidden');
                 lastUpdate.textContent = '';
             }
+        }
+
+        // D-day 및 진행률 업데이트
+        function updateDdayDisplay() {
+            const s = JSON.parse(localStorage.getItem('settings'));
+            if (!s || !s.targetDate) {
+                document.getElementById('ddaySection').style.display = 'none';
+                document.getElementById('progressSection').style.display = 'none';
+                return;
+            }
+            
+            const today = new Date();
+            const targetDate = new Date(s.targetDate);
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            // D-day 표시
+            document.getElementById('ddaySection').style.display = 'block';
+            if (diffDays > 0) {
+                document.getElementById('ddayDisplay').textContent = `D-${diffDays}`;
+                document.getElementById('ddayDisplay').style.color = 'white';
+            } else if (diffDays === 0) {
+                document.getElementById('ddayDisplay').textContent = 'D-Day!';
+                document.getElementById('ddayDisplay').style.color = '#ffe66d';
+            } else {
+                document.getElementById('ddayDisplay').textContent = `D+${Math.abs(diffDays)}`;
+                document.getElementById('ddayDisplay').style.color = '#ff6b6b';
+            }
+            document.getElementById('targetDateDisplay').textContent = s.targetDate;
+            
+            // 진행률 계산
+            const recs = JSON.parse(localStorage.getItem('records') || '[]');
+            let currentWeight = s.weight;
+            
+            if (recs.length > 0) {
+                // 최근 기록에서 체중 가져오기
+                const sortedRecs = recs.sort((a,b) => new Date(b.date) - new Date(a.date));
+                currentWeight = sortedRecs[0].weight || s.weight;
+            }
+            
+            const startWeight = s.startWeight || s.weight;
+            const targetWeight = s.target;
+            const totalLoss = startWeight - targetWeight;
+            const currentLoss = startWeight - currentWeight;
+            const progress = totalLoss > 0 ? (currentLoss / totalLoss) * 100 : 0;
+            const progressClamped = Math.max(0, Math.min(100, progress));
+            
+            // 진행률 바 표시
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('progressBar').style.width = progressClamped + '%';
+            document.getElementById('progressPercent').textContent = Math.round(progressClamped) + '%';
+            document.getElementById('startWeightDisplay').textContent = `시작: ${startWeight.toFixed(1)}kg`;
+            document.getElementById('goalWeightDisplay').textContent = `목표: ${targetWeight.toFixed(1)}kg`;
+        }
+
+        // 체중 예측 그래프
+        let predictionChartInstance = null;
+        
+        function updatePredictionChart() {
+            const s = JSON.parse(localStorage.getItem('settings'));
+            const recs = JSON.parse(localStorage.getItem('records') || '[]');
+            
+            if (!s || recs.length < 3) {
+                document.getElementById('predictionMessage').textContent = '최소 3일 이상의 체중 기록이 필요합니다!';
+                return;
+            }
+            
+            // 체중 데이터 추출 및 정렬
+            const weightData = recs
+                .filter(r => r.weight > 0)
+                .map(r => ({date: new Date(r.date), weight: r.weight}))
+                .sort((a, b) => a.date - b.date);
+            
+            if (weightData.length < 3) {
+                document.getElementById('predictionMessage').textContent = '체중 기록이 부족합니다!';
+                return;
+            }
+            
+            // 선형 회귀 계산
+            const n = weightData.length;
+            const xValues = weightData.map((_, i) => i);
+            const yValues = weightData.map(d => d.weight);
+            
+            const sumX = xValues.reduce((a, b) => a + b, 0);
+            const sumY = yValues.reduce((a, b) => a + b, 0);
+            const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+            const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
+            
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            
+            // 미래 예측 (30일)
+            const futurePoints = 30;
+            const predictions = [];
+            for (let i = n; i < n + futurePoints; i++) {
+                predictions.push(slope * i + intercept);
+            }
+            
+            // 목표 달성 예상일 계산
+            const targetWeight = s.target;
+            let achievementDay = null;
+            
+            if (slope < 0) { // 감량 중
+                const daysToGoal = (targetWeight - intercept) / slope;
+                if (daysToGoal > 0 && daysToGoal < n + futurePoints) {
+                    achievementDay = new Date(weightData[0].date);
+                    achievementDay.setDate(achievementDay.getDate() + Math.round(daysToGoal));
+                }
+            }
+            
+            // 메시지 업데이트
+            if (achievementDay && slope < 0) {
+                const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+                document.getElementById('predictionMessage').innerHTML = 
+                    `🎉 이대로 가면 <strong>${achievementDay.getFullYear()}년 ${monthNames[achievementDay.getMonth()]} ${achievementDay.getDate()}일</strong>에 목표 달성!<br>` +
+                    `<span style="font-size: 0.9rem; opacity: 0.9;">현재 추세: ${slope > 0 ? '+' : ''}${(slope * 7).toFixed(2)}kg/주</span>`;
+            } else if (slope >= 0) {
+                document.getElementById('predictionMessage').textContent = '⚠️ 체중이 증가 추세입니다. 식단과 운동을 점검해보세요!';
+            } else {
+                document.getElementById('predictionMessage').textContent = '📊 현재 추세를 유지하면 목표 달성 가능합니다!';
+            }
+            
+            // 차트 데이터 준비
+            const labels = [];
+            const actualData = [];
+            const predictionData = [];
+            const targetLine = [];
+            
+            // 실제 데이터
+            weightData.forEach((d, i) => {
+                const dateStr = `${d.date.getMonth() + 1}/${d.date.getDate()}`;
+                labels.push(dateStr);
+                actualData.push(d.weight);
+                predictionData.push(null);
+                targetLine.push(targetWeight);
+            });
+            
+            // 예측 데이터
+            for (let i = 0; i < futurePoints; i++) {
+                const futureDate = new Date(weightData[weightData.length - 1].date);
+                futureDate.setDate(futureDate.getDate() + i + 1);
+                labels.push(`${futureDate.getMonth() + 1}/${futureDate.getDate()}`);
+                actualData.push(null);
+                predictionData.push(predictions[i]);
+                targetLine.push(targetWeight);
+            }
+            
+            // 차트 생성
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            
+            if (predictionChartInstance) {
+                predictionChartInstance.destroy();
+            }
+            
+            predictionChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '실제 체중',
+                            data: actualData,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#667eea'
+                        },
+                        {
+                            label: '예측 체중',
+                            data: predictionData,
+                            borderColor: '#f093fb',
+                            backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            pointRadius: 0
+                        },
+                        {
+                            label: '목표 체중',
+                            data: targetLine,
+                            borderColor: '#4facfe',
+                            borderWidth: 2,
+                            borderDash: [10, 5],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + (context.parsed.y ? context.parsed.y.toFixed(1) + 'kg' : '-');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toFixed(1) + 'kg';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         // 페이지 로드 시 상태 체크
